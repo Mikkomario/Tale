@@ -4,6 +4,8 @@ import { Pair } from './Pair'
 // Either contains a value either on the left or on the right side
 // Eithers can be used to divide between two contrary cases (e.g. success and failure)
 export class Either {
+	// CONSTRUCTOR	-------------------
+
 	constructor(value, isRight = true) {
 		this._value = value
 		this._isRight = isRight
@@ -46,8 +48,8 @@ export class Either {
 
 	// Calls one of the specified functions, based on the side of this Either
 	// Accepts: 
-	// - Function to call if this is left
-	// - Function to call if this is right
+	// 		- Function to call if this is left
+	// 		- Function to call if this is right
 	// The called function receives the value of this either
 	// Returns function result
 	match(takeLeft, takeRight) {

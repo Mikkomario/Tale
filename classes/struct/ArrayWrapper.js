@@ -1,6 +1,6 @@
 import { ArrayIterator } from './ArrayIterator'
 import { BuilderWrapper, ArrayBuilder } from './Iterable'
-import { Some, None } from './Option'
+import { Option, Some, None } from './Option'
 import { Range } from './Range'
 import { Seq } from './Seq'
 import { Vector, VectorBuilder } from './Vector'
@@ -11,20 +11,15 @@ import { Left, Right } from './Either'
 function tryArray(items) {
 	if (Array.isArray(items))
 		return Right(items)
-	// Converts undefined and null to an empty arrray
+	// Converts undefined and null to an empty array
 	else if (items === undefined || items === null)
 		return Right([])
 	else {
 		const otherArray = items.toArray
 		if (otherArray !== undefined)
 			return Right(otherArray)
-		else {
-			const iter = items.iterator
-			if (iter !== undefined)
-				return Right(iter.toArray)
-			else
-				return Left(items)
-		}
+		else
+			return Option.resolve(items.iterator).match(iter => Right(iter.toArray), () => Left(items));
 	}
 }
 
@@ -36,8 +31,8 @@ export class ArrayWrapper extends Seq {
 	// Accepts: 
 	// - array: [Any] - An array to wrap (default = new empty array)
 	constructor(array = []) {
-		super()
-		this.array = array
+		super();
+		this.array = array;
 	}
 
 
@@ -69,11 +64,11 @@ export class ArrayWrapper extends Seq {
 
 	// IMPLEMENTED	--------------------------------
 
-	get iterator() { return new ArrayIterator(this.array) }
+	iterator() { return new ArrayIterator(this.array) }
 	newBuilder() { return new VectorBuilder() }
 
 	get size() { return this.array.length }
-	get toArray() { return [].concat(this.array) }
+	get toArray() { return this.array.slice() }
 
 	get(index) { return this.array[index] }
 
@@ -85,13 +80,14 @@ export class ArrayWrapper extends Seq {
 	addOne(item) { this.array.push(item) }
 	// Appends one or more items at the end of this array
 	add(items) {
-		const iter = items.iterator
-		if (iter !== undefined)
-			iter.foreach(item => this.array.push(item))
-		else if (Array.isArray(items))
-			items.forEach(item => this.array.push(item))
-		else
-			this.array.push(items)
+		Option.resolve(items.iterator).match(
+			iter => iter.foreach(item => this.array.push(item)), 
+			() => {
+				if (Array.isArray(items))
+					items.forEach(item => this.array.push(item));
+				else
+					this.array.push(items);
+			});
 	}
 	// Appends one item at the end of this array (alias for addOne(...))
 	pushOne(item) { this.addOne(item) }
@@ -105,22 +101,20 @@ export class ArrayWrapper extends Seq {
 		tryArray(items).match(
 			single => this.prependOne(single), 
 			arr => {
-				// console.log(`Prepending [${arr}] to ${this.toString()}`)
 				if (arr.length > 0)
-					this.array.unshift(...arr) 
-				// console.log(`=> ${this.toString()}`)
+					this.array.unshift(...arr)
 			})
 	}
 
 	// Inserts an item to a specific location in this array
 	// Accepts:
-	// - item: Any - An item to insert
-	// - index: Int - The index where that item is inserted to (default = 0)
+	// 		- item: Any - An item to insert
+	// 		- index: Int - The index where that item is inserted to (default = 0)
 	insertOne(item, index = 0) { this.array.splice(index, 0, item) }
 	// Inserts one or more items to a specific location in this array
 	// Accepts: 
-	// - items: Any - An item to insert, or an array or a collection of items
-	// - index: Int - Index where the first item will be inserted (default = 0)
+	// 		- items: Any - An item to insert, or an array or a collection of items
+	// 		- index: Int - Index where the first item will be inserted (default = 0)
 	insert(items, index = 0) {
 		tryArray(items).match(
 			single => this.insertOne(items, index), 
@@ -169,11 +163,9 @@ export class ArrayWrapper extends Seq {
 	// Accepts: 
 	// - index: Int - Index to remove, must be a valid index
 	// Returns: Item at the removed index
-	popIndex(index) {
-		return this.array.splice(index, 1)[0]
-	}
+	popIndex(index) { return this.array.splice(index, 1)[0] }
 	// Accepts: 
-	// - index: Int - Index to remove
+	// 		- index: Int - Index to remove
 	// Returns: Item at the removed index, wrapped in Some(...). None if index was not valid.
 	tryPopIndex(index) {
 		if (index >= 0 && index < this.size)
@@ -187,9 +179,9 @@ export class ArrayWrapper extends Seq {
 	// Removes and returns all items from this array
 	// The items are returned as a Vector
 	popAll() {
-		const result = this.toVector
-		this.clear()
-		return result
+		const result = this.toVector;
+		this.clear();
+		return result;
 	}
 
 	// Removes the first item from this array where the specified condition is met
@@ -222,19 +214,24 @@ export class ArrayWrapper extends Seq {
 			})
 			// Removes all found removal ranges
 			rangeBuilder.addOne(openRange)
-			rangeBuilder.result().reverseIterator.foreach(range => this.array.splice(range.start, range.length))
+			rangeBuilder.result().reverseIterator().foreach(range => this.array.splice(range.start, range.length))
 		})
 	}
 
 	// Removes a specific item from this array
-	// NB: Uses == to compare between items
+	// NB: Uses equals or == to compare between items
 	// NB: Won't remove multiple instances of that item
-	remove(item) { this.removeFirstWhere(a => a == item) }
+	remove(item) {
+		if (typeof item.equals == 'function')
+			this.removeFirstWhere(a => item.equals(a));
+		else
+			this.removeFirstWhere(a => a == item);
+	}
 
 	// Maps items in the specified range, updating the values in this array with the map results
 	// Accepts: 
-	// - range: Range - Targeted range within this array
-	// - f: Any => Any - A function that returns a modified copy of an item
+	// 		- range: Range - Targeted range within this array
+	// 		- f: Any => Any - A function that returns a modified copy of an item
 	// NB: Won't replace items where the modified copy is equal (==) to the original item
 	modifyRange(range, f) {
 		range.foreach(i => {

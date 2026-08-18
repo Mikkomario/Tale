@@ -10,12 +10,12 @@ import { Left, Right } from './Either'
 // Returns a Pair where the first value is collected left results and second value is collected right results
 export function divideWith(coll, divider) {
 	// Result collection type depends from the origin collection
-	const leftBuilder = coll.newBuilder()
-	const rightBuilder = coll.newBuilder()
+	const leftBuilder = coll.newBuilder();
+	const rightBuilder = coll.newBuilder();
 	// Separates the (mapped) values based on side
-	coll.foreach(a => divider(a).match(l => leftBuilder.addOne(l), r => rightBuilder.addOne(r)))
+	coll.foreach(a => divider(a).match(l => leftBuilder.addOne(l), r => rightBuilder.addOne(r)));
 	// Returns built collections
-	return new Pair(leftBuilder.result(), rightBuilder.result())
+	return new Pair(leftBuilder.result(), rightBuilder.result());
 }
 
 // Divides the collection values into two collections, based on a function

@@ -44,16 +44,7 @@ export class Token {
 	get expires() { return this._expires }
 
 	// Whether this token is still valid (Boolean)
-	get isValid() { 
-		/*
-		console.log('Testing expiration of token ' + this._value)
-		this._expires.match(e => {
-			console.log(e.toJson)
-			console.log(e.isInFuture)
-		}, () => console.log('No expiration time'))
-		*/
-		return this._expires.forall(e => e.isInFuture) 
-	}
+	get isValid() { return this._expires.forall(e => e.isInFuture) }
 	// Whether this token has expired (Boolean)
 	get isExpired() { return !this.isValid }
 
@@ -88,17 +79,16 @@ export class Authorization
 	// Combines two Authorizations so that another authorization is used when the first one fails
 	static combo(primaryAuth, secondaryAuth) {
 		return new Authorization(() => primaryAuth.token.catch(error => { 
-			// console.log('Using secondary authorization')
 			return secondaryAuth.token.catch(() => throw error) 
 		}))
 	}
 
 	// Creates a new authorization that stores the token locally so that it can be reused
 	// Accepts:
-	// - storage: DeviceStorage - DeviceStorage instance that handles token storing
-	// - tokenKey: String - Property name used when storing the token in device storage (default = sessionToken)
-	// - expireTimeKey: Option[String] - Property name used when storing token expiration time to the DB. None if token doesn't expire (default)
-	// - acquireNew: Authorization - Authorization used to acquire the stored token in the first place (default = failure)
+	// 		- storage: DeviceStorage - DeviceStorage instance that handles token storing
+	// 		- tokenKey: String - Property name used when storing the token in device storage (default = sessionToken)
+	// 		- expireTimeKey: Option[String] - Property name used when storing token expiration time to the DB. None if token doesn't expire (default)
+	// 		- acquireNew: Authorization - Authorization used to acquire the stored token in the first place (default = failure)
 	static stored(storage, tokenKey = 'sessionToken', expireTimeKey = None, acquireNew = Authorization.failure) {
 		const timeKey = Option.flat(expireTimeKey)
 		storage.registerSlot(tokenKey)
@@ -110,7 +100,6 @@ export class Authorization
 		function getNewAuth() {
 			return acquireNew.token.then(newToken => {
 				// Stores the newly acquired token
-				// console.log(`Storing ${newToken} as ${tokenKey}`)
 				storage.set(tokenKey, Some(newToken.value))
 				timeKey.foreach(key => storage.set(key, newToken.expires))
 
@@ -123,9 +112,9 @@ export class Authorization
 
 	// Uses a token while it is valid, then switches to another form of authorization
 	// Accepts: 
-	// - token: String - A session (or refresh) token
-	// - expiration: RichDate or Duration - Time when the token expires OR the duration of the token's lifetime
-	// - backupAuthorization: Authorization - Authorization to use once the specified token has expired
+	// 		- token: String - A session (or refresh) token
+	// 		- expiration: RichDate or Duration - Time when the token expires OR the duration of the token's lifetime
+	// 		- backupAuthorization: Authorization - Authorization to use once the specified token has expired
 	static temporaryToken(token, expiration, backupAuthorization = Authorization.failure) {
 		const actualExpiration = expiration instanceof RichDate ? expiration : Now.plus(expiration)
 		return new Authorization(() => {
@@ -138,8 +127,8 @@ export class Authorization
 
 	// Converts a fetch function into an authorization
 	// Accepts:
-	// - makeRequest: () => Promise[Response] - A function that will call fetch with suitable parameters
-	// - responseParser: Response => Promise[Token] - A function that will read the token from a successful response
+	// 		- makeRequest: () => Promise[Response] - A function that will call fetch with suitable parameters
+	// 		- responseParser: Response => Promise[Token] - A function that will read the token from a successful response
 	static request(makeRequest, responseParser) {
 		return new Authorization(() => makeRequest().then(response => {
 			if (response.ok)
@@ -163,8 +152,8 @@ export class Authorization
 	// Converts a fetch function into an authorization
 	// Expects the fetch response to contain the token as text (which may be wrapped in double quotes)
 	// Accepts:
-	// - makeRequest: () => Promise[Response] - see request
-	// - tokenDuration: Option[Duration] - how long tokens will last. None if infinitely (default).
+	// 		- makeRequest: () => Promise[Response] - see request
+	// 		- tokenDuration: Option[Duration] - how long tokens will last. None if infinitely (default).
 	static requestTokenString(makeRequest, tokenDuration = None) {
 		const actualDuration = Option.flat(tokenDuration)
 		return Authorization.request(makeRequest, response => {
@@ -175,11 +164,11 @@ export class Authorization
 	// Swaps the specified basic authentication to a token
 	// Expects server to respond with a token text or string
 	// Accepts:
-	// - User name or email address: String
-	// - Password: String
-	// - url: String - Whole url of the authentication end point
-	// - tokenDuration: Option[Duration] - Token life time
-	// - style: String - Style to request for the session (default = 'simple')
+	// 		- User name or email address: String
+	// 		- Password: String
+	// 		- url: String - Whole url of the authentication end point
+	// 		- tokenDuration: Option[Duration] - Token life time
+	// 		- style: String - Style to request for the session (default = 'simple')
 	static basic(user, password, url, tokenDuration = None, style = 'simple') {
 		return Authorization.requestTokenString(() => fetch(url, { 
 			headers: { 
@@ -247,9 +236,9 @@ export class Api {
 	// CONSTRUCTOR	------------------------
 
 	// Accepts: 
-	// - root path: String, which is applied to all requests - should end in /
-	// - authorization: Authorization - For session management (default = automatic failure)
-	// - authFailureHandler: Option[() => Any] - Callback function for cases when authorization fails
+	// 		- root path: String, which is applied to all requests - should end in /
+	// 		- authorization: Authorization - For session management (default = automatic failure)
+	// 		- authFailureHandler: Option[() => Any] - Callback function for cases when authorization fails
 	constructor(baseUri, sessionAuthorization = Authorization.failure, languagePointer = new Pointer(None), authFailureHandler = None) {
 		// Root path, including last / - String (immutable)
 		this._base = baseUri
@@ -296,15 +285,13 @@ export class Api {
 	// Performs a request to the specified uri
 	// Doesn't specify, nor require, authorization
 	// Accepts: 
-	// - path: String - Path after the root path
-	// - method: String - Method to use in this request (default = 'GET')
-	// - body: Option[Object] - Body to pass along with this request, will be converted to json (default = None)
-	// - headers: Object - Headers to apply (default = empty)
-	// - style: String - Model style expected in the response, 'simple' (default) or 'full'
+	// 		- path: String - Path after the root path
+	// 		- method: String - Method to use in this request (default = 'GET')
+	// 		- body: Option[Object] - Body to pass along with this request, will be converted to json (default = None)
+	// 		- headers: Object - Headers to apply (default = empty)
+	// 		- style: String - Model style expected in the response, 'simple' (default) or 'full'
 	// Returns an AsyncResponse
 	requestWithoutAuthorization(path, method = 'GET', body = None, headers = {}, style = 'simple') {
-		// console.log(`Sending: ${method} ${path}...`)
-
 		const that = this;
 		const wrappedBody = Option.flat(body)
 		// Forms the full headers (custom + style + content type)
@@ -321,8 +308,6 @@ export class Api {
 			else
 				fullHeaders['X-Accept-Language-Ids'] = lang
 		})
-		// console.log(`Body: ${wrappedBody.map(b => JSON.stringify(b)).value}`)
-		// console.log(`Headers: ${JSON.stringify(fullHeaders)}`)
 		// Performs the query using fetch
 		const response = fetch(that._base + path, {
 			method: method,  
@@ -335,11 +320,11 @@ export class Api {
 	// Performs a request to the specified uri
 	// Uses standard authorization
 	// Accepts: 
-	// - path: String - Path after the root path
-	// - method: String - Method to use in this request (default = 'GET')
-	// - body: Option[Object] - Body to pass along with this request, will be converted to json (default = None)
-	// - headers: Object - Additional headers to apply (default = empty)
-	// - style: String - Model style expected in the response, 'simple' (default) or 'full'
+	// 		- path: String - Path after the root path
+	// 		- method: String - Method to use in this request (default = 'GET')
+	// 		- body: Option[Object] - Body to pass along with this request, will be converted to json (default = None)
+	// 		- headers: Object - Additional headers to apply (default = empty)
+	// 		- style: String - Model style expected in the response, 'simple' (default) or 'full'
 	// Returns an AsyncResponse
 	request(path, method = 'GET', body = None, headers = {}, style = 'simple') {
 		const that = this;
@@ -347,19 +332,15 @@ export class Api {
 			.catch(error => {
 				// Relays token handling failures to the authentication failure handler
 				this._authFailureHandler.foreach(h => h(error))
-				// console.log('Authorization failed at token acquisition')
 				throw error;
 			})
 			.then(authHeader => {
-				// console.log('Using auth: ' + authHeader)
 				const fullHeaders = {
 					Authorization: authHeader, 
 					...headers
 				}
 				return that.requestWithoutAuthorization(path, method, body, fullHeaders, style)
 					.then(response => {
-						// console.log(`${method} ${path} => ${response.status}`)
-						// console.log(`Request received response of type: ${typeof response}`)
 						// Checks whether the response has unauthorized status and calls the failure handler if needed
 						if (response.status === 401)
 							this._authFailureHandler.foreach(h => h(response));
@@ -372,9 +353,9 @@ export class Api {
 	// Performs a GET request to the specified uri
 	// Uses standard authorization
 	// Accepts: 
-	// - path: String - Path after the root path
-	// - headers: Object - Additional headers to apply - Default = empty
-	// - style: String - 'simple' (default) or 'full'
+	// 		- path: String - Path after the root path
+	// 		- headers: Object - Additional headers to apply - Default = empty
+	// 		- style: String - 'simple' (default) or 'full'
 	// Returns an AsyncResponse
 	get(path, headers = {}, style = 'simple') { return this.request(path, 'GET', None, headers, style) }
 
@@ -419,19 +400,19 @@ export class Api {
 	// Performs a POST/PUT/PATCH request to a back end server path with a json body
 	// Uses standard authorization
 	// Accepts:
-	// - path: String (see get)
-	// - body: Object - Will be converted to json (default = empty)
-	// - method: String - Method to use (default = 'POST')
-	// - headers: Object - Additional headers to provide (default = empty)
-	// - style: String (see get)
+	// 		- path: String (see get)
+	// 		- body: Object - Will be converted to json (default = empty)
+	// 		- method: String - Method to use (default = 'POST')
+	// 		- headers: Object - Additional headers to provide (default = empty)
+	// 		- style: String (see get)
 	// Returns an AsyncResponse
 	push(path, body = {}, method = 'POST', headers = {}, style = 'simple') { return this.request(path, method, body, headers, style); }
 
 	// Performs a DELETE request to a back end server path
 	// Uses standard authorization
 	// Accepts:
-	// - path: String (see get)
-	// - headers: Object - additional headers to provide (default = empty)
+	// 		- path: String (see get)
+	// 		- headers: Object - additional headers to provide (default = empty)
 	// Returns an AsyncResponse
 	delete(path, headers = {}) { return this.request(path, 'DELETE', {}, headers) }
 }

@@ -48,8 +48,8 @@ export class DeviceStorage {
 	// CONSTRUCTOR	--------------------------------
 
 	// Accepts:
-	// - allowStore: Boolean - Whether localStorage use is enabled (default = true)
-	// - initialSlots: Vector[StorageSlot] - Slots to use for storing data (default = empty)
+	// 		- allowStore: Boolean - Whether localStorage use is enabled (default = true)
+	// 		- initialSlots: Vector[StorageSlot] - Slots to use for storing data (default = empty)
 	constructor(allowStore = true, initialSlots = Vector.empty) {
 		this.allowStore = allowStore
 		this.slots = Vector.flat(initialSlots)

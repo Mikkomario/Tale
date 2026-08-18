@@ -31,8 +31,8 @@ export class Wait {
 	// CONSTRUCTOR	---------------------------------
 
 	// Accepts: 
-	// Target: Any - Supported data types are: RichDate, Date, Duration, Int (milliseconds) and String (date)
-	// startImmediately: Boolean - Whether this wait should immediately be marked as started (default = false)
+	// 		Target: Any - Supported data types are: RichDate, Date, Duration, Int (milliseconds) and String (date)
+	// 		startImmediately: Boolean - Whether this wait should immediately be marked as started (default = false)
 	constructor(target, startImmediately = false) {
 		this.target = parseTarget(target)
 		this.started = startImmediately ? Some(RichDate.now()) : None

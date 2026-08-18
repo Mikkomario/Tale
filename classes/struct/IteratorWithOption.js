@@ -1,31 +1,31 @@
 import { Iterator } from './Iterator'
 import { Some, None } from './Option'
 
+// A separate subclass of iterator that supports functions that utilize the Option class
 export class IteratorWithOption extends Iterator {
 	nextOption() {
 		if (this.hasNext)
-			return Some(this.next())
+			return Some(this.next());
 		else
-			return None
+			return None;
 	}
 
 	find(f) {
 		while (this.hasNext) {
-			const candidate = this.next()
+			const candidate = this.next();
 			if (f(candidate))
-				return Some(candidate)
+				return Some(candidate);
 		}
-		return None
+		return None;
 	}
 }
 
-// A separate subclass of iterator that supports functions that utilize the Option class
 export class IteratorWithOptionWrapper extends IteratorWithOption {
 	constructor(wrapped) {
-		super()
-		this._source = wrapped
+		super();
+		this._source = wrapped;
 	}
 
-	get hasNext() { return this._source.hasNext }
-	next() { return this._source.next() }
+	get hasNext() { return this._source.hasNext; }
+	next() { return this._source.next(); }
 }

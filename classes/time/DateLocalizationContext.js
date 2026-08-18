@@ -1,10 +1,12 @@
 // An object used for producing localized date string content
 export class DateLocalizationContext {
+	// CONSTRUCTOR	-----------------------
+
 	// Accepts: 
-	// - dayNames: [String] - Names of week days, starting from Sunday
-	// - monthNames: [String] - Names of months, starting from January
-	// - dayToString: Int => String - A function that accepts a day of month and returns a string representation (default = return as is)
-	// - combineDayAndMonth: (String, String) => String - A function that accepts day and month strings and combines them
+	// 		- dayNames: [String] - Names of week days, starting from Sunday
+	// 		- monthNames: [String] - Names of months, starting from January
+	// 		- dayToString: Int => String - A function that accepts a day of month and returns a string representation (default = return as is)
+	// 		- combineDayAndMonth: (String, String) => String - A function that accepts day and month strings and combines them
 	constructor(dayNames, monthNames, dayToString = d => d, combineDayAndMonth = (day, month) => `${day} ${month}`) {
 		this.dayNames = dayNames
 		this.monthNames = monthNames
@@ -12,9 +14,12 @@ export class DateLocalizationContext {
 		this.combineDayAndMonth = combineDayAndMonth
 	}
 
+
+	// OTHER	---------------------------
+
 	// Accepts:
-	// - dayOfMonth: Int - [1, 31] - Day of month
-	// - monthIndex: Int - [0, 11] - Month index (starting from 0 = January)
+	// 		- dayOfMonth: Int - [1, 31] - Day of month
+	// 		- monthIndex: Int - [0, 11] - Month index (starting from 0 = January)
 	// Returns: A string containing both values
 	dayMonthString(dayOfMonth, monthIndex) {
 		return this.combineDayAndMonth(this.dayToString(dayOfMonth), this.monthNames[monthIndex])

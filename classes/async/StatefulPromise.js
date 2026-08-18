@@ -3,18 +3,21 @@ import { Try, Success, Failure } from '../struct/Try'
 
 // A wrapper for Promise that also tracks state (isCompleted & result) which is accessible from outside
 export class StatefulPromise {
+	// CONSTRUCTOR	----------------------
+
+	// Expects wrapped to be a Promise
 	constructor(wrapped) {
 		this.result = None;
 		this.wrapped = wrapped;
 
 		// Updates the state when the wrapped promise completes
-		const that = this
+		const that = this;
 		wrapped
 			.then(success => {
 				if (success instanceof Try)
-					that.result = Some(success)
+					that.result = Some(success);
 				else
-					that.result = Some(Success(success))
+					that.result = Some(Success(success));
 			})
 			.catch(error => that.result = Some(Failure(error)))
 	}
@@ -23,6 +26,9 @@ export class StatefulPromise {
 	static reject(error) { return new StatefulPromise(Promise.reject(error)) }
 	// Wraps a resolved promise
 	static resolve(f) { return new StatefulPromise(Promise.resolve(f)) }
+
+
+	// OTHER	--------------------------
 
 	// Current success, if one is available
 	get success() { return this.result.flatMap(r => r.success); }
@@ -67,18 +73,12 @@ export class StatefulPromise {
 export function Stateful(p) {
 	if (p instanceof StatefulPromise)
 		return p;
-	else if (p instanceof Promise) {
-		// console.log('Converting a promise to a stateful promise')
+	else if (p instanceof Promise)
 		return new StatefulPromise(p);
-	}
-	else if (p instanceof Try) {
-		// console.log('Converting a try into a stateful promise')
+	else if (p instanceof Try)
 		return p.match(s => StatefulPromise.resolve(s), e => StatefulPromise.reject(e));
-	}
-	else if (typeof p === 'function') {
-		// console.log('Converting a function to a stateful promise')
+	else if (typeof p === 'function')
 		return Stateful(p());
-	}
 	else
 		return StatefulPromise.resolve(p);
 }

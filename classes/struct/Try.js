@@ -2,6 +2,8 @@ import { None, Some } from './Option.js'
 
 // A class that represents a success or a failure
 export class Try {
+	// CONSTRUCTOR	------------------------
+
 	// Success is null on failure. Failure is None or Some(Error). 
 	// Exactly one of these should be specified.
 	constructor(s = null, f = None) {
@@ -31,8 +33,14 @@ export class Try {
 			return Try.success(f);
 	}
 
+
+	// IMPLEMENTED	------------------------
+
 	valueOf() { return this._value }
 	equals(other) { return this.valueOf() === other.valueOf() }
+
+
+	// OTHER	----------------------------
 
 	// The success value of this try as an option
 	get success() {

@@ -64,8 +64,8 @@ export class AsyncResponse {
 	text() { return this.wrapped.text() }
 
 	// Accepts:
-	// handlers: Dict[Int, Response => Any] - Keys are response status codes and values are functions to handle those responses
-	// successHandler: Response => Any - A function that accepts a successful (200-299) response (not covered by specified handlers)
+	// 		handlers: Dict[Int, Response => Any] - Keys are response status codes and values are functions to handle those responses
+	// 		successHandler: Response => Any - A function that accepts a successful (200-299) response (not covered by specified handlers)
 	// Returns: Promise of one of those function values, or a failed promise if response was failure not covered by specified handlers
 	handleStatuses(handlers, successHandler) {
 		const that = this
@@ -75,9 +75,9 @@ export class AsyncResponse {
 		)
 	}
 	// Accepts:
-	// - status: Int - Status that receives special handling
-	// - statusHandler: Response => Any - Function called if the response status matches the specified status
-	// - successHandler: Response => Any - Function called if the response is a success (and outside specified status)
+	// 		- status: Int - Status that receives special handling
+	// 		- statusHandler: Response => Any - Function called if the response status matches the specified status
+	// 		- successHandler: Response => Any - Function called if the response is a success (and outside specified status)
 	// Returns: Promise of either function result, or a failed promise if response was failure outside of the specified status
 	handleStatus(status, statusHandler, successHandler) {
 		const that = this

@@ -14,7 +14,11 @@ function floatToString(float) {
 		return float.toFixed(1);
 }
 
+// Represents the passing of time
 export class Duration {
+	// CONSTRUCTOR	------------------
+
+	// Creates a new duration. Either based on Date or milliseconds count.
 	constructor(millis) {
 		this._millis = millis instanceof Date ? millis.getTime() : millis;
 	}
@@ -29,6 +33,9 @@ export class Duration {
 		else
 			return new Duration(d)
 	}
+
+
+	// IMPLEMENTED	-----------------
 
 	valueOf() { return this._millis }
 	equals(other) { return this.valueOf() === other.valueOf() }
@@ -107,6 +114,10 @@ export class Duration {
 			}
 		}
 	}
+
+
+	// COMPUTED	---------------------
+
 	get toJson() { return this._millis }
 
 	get isPositive() { return this._millis > 0 }
@@ -144,6 +155,9 @@ export class Duration {
 	get toWeeks() { return this._millis / millisToWeeks }
 	get toFullWeeks() { return Math.floor(this.toWeeks) }
 	get isWeeks() { return this._millis >= 2 * millisToWeeks }
+
+
+	// OTHER	-----------------------
 
 	plus(other) {
 		if (other instanceof Duration)

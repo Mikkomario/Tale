@@ -30,12 +30,12 @@ class IndexIterator extends IteratorWithOption {
 		this._source = get;
 		this._length = length;
 		this._nextIndex = start;
-		this._makeNewBuilder = makeNewBuilder
+		this._makeNewBuilder = makeNewBuilder;
 	}
 
 	// IMPLEMENTED	--------------------------------
 
-	get hasNext() { return this._nextIndex < this._length }
+	get hasNext() { return this._nextIndex < this._length; }
 	next() { 
 		const result = this._source(this._nextIndex);
 		this._nextIndex += 1;
@@ -45,11 +45,11 @@ class IndexIterator extends IteratorWithOption {
 
 	// OVERRIDES	--------------------------------
 
-	newBuilder() { this._makeNewBuilder() }
+	newBuilder() { this._makeNewBuilder(); }
 
 	drop(amount) {
-		this._nextIndex += amount
-		return this
+		this._nextIndex += amount;
+		return this;
 	}
 }
 
@@ -77,11 +77,11 @@ export class Vector extends Seq {
 	// Converts nulls and undefineds to empty vectors
 	static flat(item) {
 		if (item === null || item === undefined)
-			return Vector.empty
+			return Vector.empty;
 		if (item instanceof Vector)
-			return item
+			return item;
 		else
-			return new Option(item.iterator).match(
+			return Option.resolve(item.iterator).match(
 				iter => iter.to(new BuilderWrapper(new ArrayBuilder(), array => new Vector(array))), 
 				() => new Vector(item))
 	}
@@ -92,23 +92,23 @@ export class Vector extends Seq {
 	// Returns a copy of this Vector that has been sorted using the default comparison function
 	get sorted() { return this.sortWith(defaultCompare) }
 
-	// Returns a copy of this vector where each item is unique by comparison (==)
+	// Returns a copy of this vector where each item is unique by comparison (===)
 	get distinct() { return this.distinctWith((a, b) => a === b); }
 
 
 	// IMPLEMENTED	----------------------------------
 
-	get iterator() { 
+	iterator() { 
 		const that = this
-		return new IndexIterator(i => that._array[i], this.size, 0, () => that.newBuilder()) 
+		return new IndexIterator(i => that._array[i], this.size, 0, () => that.newBuilder());
 	}
 	iteratorWith(makeBuilder) {
 		const that = this;
 		function f(i) { return that.get(i); }
 		if (makeBuilder === undefined)
-			return new IndexIterator(f, this.size, 0, () => that.newBuilder())
+			return new IndexIterator(f, this.size, 0, () => that.newBuilder());
 		else
-			return new IndexIterator(f, this.size, 0, makeBuilder)
+			return new IndexIterator(f, this.size, 0, makeBuilder);
 	}
 	newBuilder() { return new BuilderWrapper(new ArrayBuilder(), array => new Vector(array)) }
 
@@ -121,15 +121,17 @@ export class Vector extends Seq {
 	get head() { return this._array[0]; }
 	get last() { return this._array[this.size - 1] }
 
+	get toArray() { return this._array.slice(); }
+
 	take(amount) {
 		if (amount >= this.size)
 			return this
 		else if (amount <= 0)
 			return Vector.empty
 		else {
-			const builder = new ArrayBuilder()
-			this.forRange(a => builder.addOne(a), 0, amount)
-			return new Vector(builder.result())
+			const builder = new ArrayBuilder();
+			this.forRange(a => builder.addOne(a), 0, amount);
+			return new Vector(builder.result());
 		}
 	}
 
@@ -142,17 +144,21 @@ export class Vector extends Seq {
 	// 		- < 0 if a < 0
 	// 		- 0 if a == b
 	// Returns: A sorted copy of this Vector
-	sortWith(f = defaultCompare) {
-		return new Vector(this.toArray.sort(f))
-	}
+	sortWith(f = defaultCompare) { return new Vector(this.toArray.sort(f)) }
 	// Accepts: 
-	// - map: A => B - A function that maps values of this Vector to comparable items
-	// - compare: (B, B) => Number - A comparison function to use for the mapped values (default = default comparison function)
+	// 		- map: A => B - A function that maps values of this Vector to comparable items
+	// 		- compare: (B, B) => Number - A comparison function to use for the mapped values (default = default comparison function)
 	// Returns: A copy of this Vector that has been sorted by comparing the mapped values
 	sortBy(map, compare = defaultCompare) {
 		return this.sortWith((a, b) => compare(map(a), map(b)))
 	}
 
+	// Creates a new vector with exactly one item appended, regardless of type
+	plusOne(item) {
+		const newArray = this._array.slice();
+		newArray.push(item);
+		return new Vector(newArray);
+	}
 	// Creates a new vector with n items appended, depending on the type of the specified parameter
 	// Adding an Iterable item or an Array may add multiple items
 	// Adding some other type adds exactly one item
@@ -170,12 +176,6 @@ export class Vector extends Seq {
 		else
 			return this.plusOne(item);
 	}
-	// Creates a new vector with exactly one item appended, regardless of type
-	plusOne(item) {
-		const newArray = this._array.slice();
-		newArray.push(item);
-		return new Vector(newArray);
-	}
 	// Creates a new vector with exactly one item prepended, regardless of type
 	prependOne(item) {
 		const newArray = this._array.slice();
@@ -190,7 +190,7 @@ export class Vector extends Seq {
 		if (this.size >= targetSize)
 			return this
 		else {
-			const buffer = this.toArray
+			const buffer = this.toArray;
 			if (typeof item === 'function') {
 				for (let i = this.size; i <= targetSize; i++) {
 					buffer.push(item())
@@ -219,7 +219,7 @@ export class Vector extends Seq {
 	// Removes items which map to a duplicate item when using the specified mapping function
 	// Upon duplicate entries, preserves the first entry
 	// Accepts:
-	// - map: A => Any - A function that maps vector values to something else (comparable items)
+	// 		- map: A => Any - A function that maps vector values to something else (comparable items)
 	// Returns: A copy of this vector with only unique values (when comparing mapped values)
 	distinctBy(map) {
 		const result = []
@@ -227,11 +227,11 @@ export class Vector extends Seq {
 		this.foreach(a => {
 			const mapped = map(a)
 			if (!mapValues.some(v => v == mapped)) {
-				result.push(a)
-				mapValues.push(mapped)
+				result.push(a);
+				mapValues.push(mapped);
 			}
 		})
-		return new Vector(result)
+		return new Vector(result);
 	}
 }
 

@@ -8,25 +8,25 @@ export class IterableWithOption extends Iterable {
 	// Returns: Some(head) if this collection is not empty. None otherwise.
 	get headOption() {
 		if (this.isEmpty)
-			return None
+			return None;
 		else
-			return Some(this.head)
+			return Some(this.head);
 	}
 
 
 	// OTHER -------------------------------------
 
 	// Accepts: 
-	// - f: Any => Boolean - A function that returns true for the targeted item
+	// 		- f: Any => Boolean - A function that returns true for the targeted item
 	// Returns: The first item accepted by the specified function. None if no item was accepted.
 	find(f) {
-		const iter = this.iterator
+		const iter = this.iterator();
 		while (iter.hasNext) {
-			const item = iter.next()
+			const item = iter.next();
 			if (f(item))
-				return Some(item)
+				return Some(item);
 		}
-		return None
+		return None;
 	}
 
 	// Accepts: 
@@ -34,12 +34,12 @@ export class IterableWithOption extends Iterable {
 	// 		- NB: Also supports other Iterables than Option, they just need to contain .nonEmpty -property
 	// Returns: The first function result that is not empty. None otherwise.
 	findMap(f) {
-		const iter = this.iterator
+		const iter = this.iterator();
 		while (iter.hasNext) {
-			const item = f(iter.next())
+			const item = f(iter.next());
 			if (item.nonEmpty)
-				return item
+				return item;
 		}
-		return None
+		return None;
 	}
 }

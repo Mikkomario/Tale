@@ -7,8 +7,12 @@ import { Pair } from './Pair'
 function valueToPair(value) {
 	if (value instanceof Pair)
 		return value;
-	else if (value instanceof Vector && value.nonEmpty)
-		return new Pair(value.head, value.tail);
+	else if (value instanceof Vector && value.nonEmpty) {
+		if (value.size === 2)
+			return new Pair(value.head, value.get(1));
+		else
+			return new Pair(value.head, value.tail);
+	}
 	else if (Array.isArray(value) && value.length > 0) {
 		if (value.length === 2)
 			return new Pair(value[0], value[1]);
@@ -22,8 +26,12 @@ function valueToPair(value) {
 function valueToPairs(value) {
 	if (value instanceof Vector && value.forall(a => a instanceof Pair))
 		return value;
-	else if (value instanceof Pair)
-		return new Vector([value]);
+	else if (value instanceof Pair) {
+		if (value.forall(a => a instanceof Pair))
+			return value;
+		else
+			return new Vector([value]);
+	}
 	else if (value instanceof Map) {
 		const buffer = [];
 		value.forEach((k, v) => buffer.push(new Pair(k, v)));
@@ -43,7 +51,7 @@ function valueToPairs(value) {
 		return new Vector([new Pair(value, Vector.empty)]);
 }
 
-// Converts almost any value type to a json value
+// Converts almost any value type to a JSON value
 function valueToJson(value) {
 	if (value === null || value === undefined)
 		return 'null';
@@ -59,12 +67,15 @@ function valueToJson(value) {
 		return `[${new Vector(value).map(a => valueToJson(a)).mkString(', ')}]`;
 	else if (value instanceof Option)
 		return value.match(v => valueToJson(v), () => 'null');
-	else if (value instanceof Iterable)
-		return `[${value.mapWith(a => valueToJson(a), new VectorBuilder()).mkString(', ')}]`;
-	else if (typeof value === 'object')
-		return `{${new Vector(Object.keys(value)).map(key => `"${key}": ${valueToJson(value[key])}`).mkString(', ')}}`
 	else
-		return `"${value.toString()}"`
+		return Option.resolve(value.iterator).match(
+			iter => `[${ iter.map(a => valueToJson(a)).mkString(', ') }]`, 
+			() => {
+				if (typeof value === 'object')
+					return `{${new Vector(Object.keys(value)).map(key => `"${key}": ${valueToJson(value[key])}`).mkString(', ')}}`
+				else
+					return `"${value.toString()}"`
+			})
 }
 
 // If the specified function takes multiple parameters, passes pairs in parts, otherwise passes them whole
@@ -77,6 +88,8 @@ function functionForPairs(f) {
 
 // This class behaves like an immutable Map (would be named Map if not for conflicts with existing classes)
 export class Dict extends IterableWithOption {
+	// CONSTRUCTOR	--------------------------
+
 	// Constructor
 	// Expects a vector of pairs
 	// Also interprets following:
@@ -90,8 +103,14 @@ export class Dict extends IterableWithOption {
 		this._keys = this._pairs.map(p => p.first);
 	}
 
+
+	// STATIC	-----------------------------
+
 	// An empty map
 	static empty = new Dict(Vector.empty);
+
+
+	// IMPLEMENTED	-------------------------
 
 	_dictOrVector(v) {
 		// Returns either a Dict or a Vector, depending on the type of items within
@@ -101,9 +120,8 @@ export class Dict extends IterableWithOption {
 			return v;
 	}
 
-	// Implemented
-	get iterator() { 
-		const that = this
+	iterator() { 
+		const that = this;
 		return this._pairs.iteratorWith(() => that.newBuilder()); 
 	}
 	newBuilder() { return new BuilderWrapper(new VectorBuilder(), vector => this._dictOrVector(vector)) }
@@ -118,16 +136,18 @@ export class Dict extends IterableWithOption {
 	map(f, builder = this.newBuilder()) { return super.map(functionForPairs(f), builder) }
 	flatMap(f, builder = this.newBuilder()) { return super.flatMap(functionForPairs(f), builder) }
 	async asyncMap(f, builder = this.newBuilder()) { return await super.asyncMap(functionForPairs(f), builder) }
+	async mapParallel(f, builder = this.newBuilder()) { return await super.mapParallel(functionForPairs(f), builder) }
+	
 	get nonEmpty() { return this._pairs.nonEmpty }
-
 	get head() { return this._pairs.head }
 	get headOption() { return this._pairs.headOption }
 	get size() { return this._pairs.size }
-	get toJson() { return `{${this._pairs.map(p => `"${p.first}": ${valueToJson(p.second)}`).mkString(', ')}}` }
+
+	get toJson() { return `{${this._pairs.iterator().map(p => `"${p.first}": ${valueToJson(p.second)}`).mkString(', ')}}` }
 	get keys() { return this._keys; }
 	get toVector() { return this._pairs; }
 	get values() { return this._pairs.map(p => p.second) }
-	get valuesIterator() { return this._pairs.iterator.map(pair => pair.second) }
+	valuesIterator() { return this._pairs.iterator().map(pair => pair.second) }
 
 	filterNot(f, builder = this.newBuilder()) { 
 		const pairF = functionForPairs(f);
@@ -146,16 +166,18 @@ export class Dict extends IterableWithOption {
 	apply(key) { return this.get(key).match(v => v, () => throw new Error('No value for key: ' + key)) }
 	// Gets the value for key as a vector. Used with multi maps. If this map didn't contain that key, returns an empty vector.
 	getVector(key) {
-		return this.get(key).match(value => {
-			if (value instanceof Vector)
-				return value;
-			else if (value instanceof Iterable)
-				return value.to(new VectorBuilder());
-			else if (Array.isArray(value))
-				return new Vector(value);
-			else
-				return new Vector([value]);
-		}, () => Vector.empty)
+		return this.get(key).match(
+			value => {
+				if (value instanceof Vector)
+					return value;
+				else if (value instanceof Iterable)
+					return value.to(new VectorBuilder());
+				else if (Array.isArray(value))
+					return new Vector(value);
+				else
+					return new Vector([value]);
+			}, 
+			() => Vector.empty)
 	}
 
 	// Creates a new dict with an item appended or overwritten

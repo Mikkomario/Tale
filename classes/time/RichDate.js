@@ -5,6 +5,8 @@ export function localTimeZone() { return Intl.DateTimeFormat().resolvedOptions()
 
 // A date wrapper class with extended features
 class DateLike {
+	// COMPUTED 1/2	--------------------
+
 	// Intended to be overwritten
 	get toDate() { return new Date() }
 
@@ -14,6 +16,9 @@ class DateLike {
 	get toJson() { return this.toDate.toISOString() }
 	get toHeaderValue() { return this.toDate.toUTCString() }
 
+
+	// IMPLEMENTED	-------------------
+
 	valueOf() { return this.toDate.valueOf() }
 	equals(other) { return this.valueOf() === other.valueOf() }
 	toString(context = englishDateContext) { 
@@ -22,6 +27,9 @@ class DateLike {
 		else
 			return this.dateStringIn(context);
 	}
+
+
+	// COMPUTED	2/2 	-------------
 
 	// Getters for days, weekdays, months, and years
 	get dayOfWeekIndex() { return this.toDate.getDay() }
@@ -148,6 +156,8 @@ class DateLike {
 }
 
 export class RichDate extends DateLike {
+	// CONSTRUCTOR	-----------------------
+
 	constructor(wrapped = new Date()) {
 		super();
 		this._date = wrapped instanceof Date ? wrapped : new Date(wrapped);
@@ -164,7 +174,13 @@ export class RichDate extends DateLike {
 			return new RichDate(new Date(millis)) 
 	}
 
+
+	// IMPLEMENTED	---------------------
+
 	get toDate() { return this._date }
+
+
+	// COMPUTED	-------------------------
 
 	get isToday() { return this.hasSameDateAs(new RichDate()) }
 	get isTomorrow() { return this.hasSameDateAs(new RichDate().tomorrow) }
@@ -173,6 +189,9 @@ export class RichDate extends DateLike {
 	get atEndOfDay() { return this.tomorrow.atBeginningOfDay }
 	get tomorrow() { return this.plus(hours(24)) }
 	get yesterday() { return this.minus(hours(24)) }
+
+
+	// OTHER	------------------------
 
 	hasSameDateAs(other) {
 		if (other instanceof DateLike)

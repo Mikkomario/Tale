@@ -55,8 +55,8 @@ export class Pointer {
 		// and if there are listeners to inform
 		if (newValue !== oldValue && (this._listeners.nonEmpty || this._namedListeners.nonEmpty)) {
 			const event = new ChangeEvent(oldValue, newValue)
-			this._listeners.foreach(listener => listener(event))
-			this._namedListeners.valuesIterator.foreach(listener => listener(event))
+			this._listeners.foreach(listener => listener(event));
+			this._namedListeners.valuesIterator.foreach(listener => listener(event));
 		}
 	}
 
@@ -65,10 +65,10 @@ export class Pointer {
 
 	// Adds a new change listener to this pointer
 	onChange(listener) {
-		this._listeners = this._listeners.plus(listener)
+		this._listeners = this._listeners.plus(listener);
 	}
 	addNamedListener(name, listener) {
-		this._namedListeners = this._namedListeners.plus(name, listener)
+		this._namedListeners = this._namedListeners.plus(name, listener);
 	}
 	// Adds a new change listener to this pointer
 	// Immediately calls the change listener

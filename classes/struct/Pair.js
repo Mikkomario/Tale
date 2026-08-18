@@ -4,18 +4,20 @@ import { Seq } from './Seq'
 import { Vector, VectorBuilder } from './Vector'
 
 class PairIterator extends IteratorWithOption {
+	// CONSTRUCTOR	------------------------
+
 	constructor(first, second, makeBuilder = () => new VectorBuilder()) {
 		super();
 		this._first = first;
 		this._second = second;
 		this._nextIndex = 0;
-		this._makeBuilder = makeBuilder
+		this._makeBuilder = makeBuilder;
 	}
 
-	// Implemented
-	get hasNext() {
-		return this._nextIndex < 2 
-	}
+
+	// IMPLEMENTED	------------------------
+
+	get hasNext() { return this._nextIndex < 2 }
 	next() {
 		const idx = this._nextIndex;
 		this._nextIndex += 1;
@@ -54,8 +56,8 @@ export class Pair extends Seq {
 
 	// IMPLEMENTED	-----------------------------
 
-	get iterator() { 
-		const that = this
+	iterator() { 
+		const that = this;
 		return new PairIterator(this.first, this.second, () => that.newBuilder()); 
 	}
 
@@ -91,8 +93,8 @@ export class Pair extends Seq {
 			return Vector.single(this.first)
 	}
 	foreach(f) {
-		f(this.first)
-		f(this.second)
+		f(this.first);
+		f(this.second);
 	}
 	map(f) { return new Pair(f(this.first), f(this.second)); }
 

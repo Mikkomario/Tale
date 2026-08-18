@@ -6,13 +6,14 @@ class IteratorLike extends Iterable {
 
 	get hasNext() { throw new Error('.hasNext not implemented') }
 	next() { throw new Error('.next() not implemented') }
+
 	// It is also recommended to implement other methods, also
 	// which can't be implented here due to cyclic references
 
 
 	// IMPLEMENTED	-------------------------
 
-	get iterator() { return this }
+	iterator() { return this; }
 
 	// To support javascript iterator & iterable (return in [Symbol.iterator]())
 	get symbol() {
@@ -30,8 +31,8 @@ class IteratorLike extends Iterable {
 
 	// OVERRIDES	-------------------------
 
-	get nonEmpty() { return this.hasNext }
-	get head() { return this.next() }
+	get nonEmpty() { return this.hasNext; }
+	get head() { return this.next(); }
 
 	// Calls the specified function for all items in this iterator
 	foreach(f) {
@@ -44,10 +45,10 @@ class IteratorLike extends Iterable {
 	drop(count) {
 		var dropped = 0
 		while (dropped < count && this.hasNext) {
-			this.next()
-			dropped += 1
+			this.next();
+			dropped += 1;
 		}
-		return this
+		return this;
 	}
 
 	// Converts the remaining items in this iterator to another collection by using the specified builder
@@ -56,74 +57,91 @@ class IteratorLike extends Iterable {
 		this.foreach(item => builder.addOne(item));
 		return builder.result();
 	}
+
+	// Creates a string from the contents of this iterator, consuming this iterator.
+	// Accepts:
+	//		- separator: String - A separator placed between each item. Default = empty.
+	// Returns a string from this collection
+	mkString(separator = '') {
+		if (this.hasNext) {
+			let str = this.next().toString();
+			while (this.hasNext) {
+				str += separator;
+				str += this.next().toString();
+			}
+			return str;
+		}
+		else
+			return '';
+	}
 }
 
+// An empty Iterator implementation
 export class EmptyIterator extends IteratorLike {
-	get hasNext() { return false }
+	get hasNext() { return false; }
 	next() { throw new Error('Called next() on an empty iterator') }
 
-	take() { return this }
-	drop() { return this }
+	take() { return this; }
+	drop() { return this; }
 
-	map() { return this }
-	flatMap() { return this }
-	filter() { return this }
-	filterNot() { return this }
+	map() { return this; }
+	flatMap() { return this; }
+	filter() { return this; }
+	filterNot() { return this; }
 }
 
+// An iterator that yields a single item
 export class SingleItemIterator extends IteratorLike {
 	constructor(item) {
-		super()
-		this._item = item
-		this._consumed = false
+		super();
+		this._item = item;
+		this._consumed = false;
 	}
 
-	get hasNext() { return !this._consumed }
+	get hasNext() { return !this._consumed; }
 	next() { 
-		this._consumed = true
-		return this._item 
+		this._consumed = true;
+		return this._item;
 	}
 
 	take(amount) {
 		if (amount > 0)
-			return this
-		else {
-			this._consumed = true
-			return this
-		}
+			return this;
+		else
+			return new EmptyIterator();
 	}
 	drop(amount) {
 		if (amount <= 0)
-			return this
-		else 
-		{
-			this._consumed = true
-			return this
+			return this;
+		else {
+			this._consumed = true;
+			return this;
 		}
 	}
 	map(f) {
 		if (this.hasNext)
-			return new SingleItemIterator(f(this._item))
+			return new SingleItemIterator(f(this._item));
 		else
-			return this
+			return this;
 	}
 	flatMap(f) {
+		// TODO: Could add a lazy implementation of this
 		if (this.hasNext) {
-			const mapped = f(this._item)
-			const iter = mapped.iterator
-			if (iter === undefined)
-				return new SingleItemIterator(mapped)
+			const mapped = f(this._item);
+			const getIter = mapped.iterator;
+			if (typeof getIter !== 'function')
+				return new SingleItemIterator(mapped);
 			else
-				return iter
+				return getIter();
 		}
 		else
-			return this
+			return this;
 	}
 	filter(f) {
 		if (this.hasNext && !f(this._item))
-			return new EmptyIterator()
+			return new EmptyIterator();
 		else
-			return this
+			return this;
 	}
 }
 
@@ -132,71 +150,69 @@ export class IteratorWrapper extends IteratorLike {
 	// CONSTRUCTOR	------------------------
 
 	constructor(source) {
-		super()
-		this._source = source
+		super();
+		this._source = source;
 	}
 
 
 	// IMPLEMENTED	-----------------------
 
-	get hasNext() { return this._source.hasNext }
-	next() { return this._source.next() }
+	get hasNext() { return this._source.hasNext; }
+	next() { return this._source.next(); }
 
 
 	// OVERRIDES	-----------------------
 
-	newBuilder() { return this._source.newBuilder() }
+	newBuilder() { return this._source.newBuilder(); }
 
-	map(f) { return this._source.map(f) }
-	flatMap(f) { return this._source.flatMap(f) }
-	filter(f) { return this._source.filter(f) }
+	map(f) { return this._source.map(f); }
+	flatMap(f) { return this._source.flatMap(f); }
+	filter(f) { return this._source.filter(f); }
 }
 
 class FlatMappingIterator extends IteratorWrapper {
 	// CONSTRUCTOR	----------------------
 
-	constructor(source, mapper) {
-		super(source)
-		this._map = mapper
-
-		this._cachedIter = null
+	constructor(source, mapper = a => a) {
+		super(source);
+		this._map = mapper;
+		this._cachedIter = null;
 	}
 
 
 	// COMPUTED	-------------------------
 
 	// Acquires the next available iterator, if possible
-	get _pollIter() {
+	_pollIter() {
 		while ((this._cachedIter === null || !this._cachedIter.hasNext) && this._source.hasNext) {
-			const mappedNext = this._map(this._source.next())
-			const nextIter = mappedNext.iterator
-			if (nextIter === undefined)
-				this._cachedIter = new SingleItemIterator(mappedNext)
+			const mappedNext = this._map(this._source.next());
+			const getNextIter = mappedNext.iterator;
+			if (typeof getNextIter === 'function')
+				this._cachedIter = getNextIter();
 			else
-				this._cachedIter = nextIter
+				this._cachedIter = new SingleItemIterator(mappedNext);
 		}
-		return this._cachedIter
-	} 
+		return this._cachedIter;
+	}
 
 
 	// IMPLEMENTED	---------------------
 
 	get hasNext() {
-		const nextIter = this._pollIter
-		return nextIter != null && nextIter.hasNext
+		const nextIter = this._pollIter();
+		return nextIter != null && nextIter.hasNext;
 	}
-	next() { return this._pollIter.next() }
+	next() { return this._pollIter().next(); }
 
-	map(f) { 
-		return new FlatMappingIterator(this, i => new SingleItemIterator(f(i))) 
-	}
-	flatMap(f) { return new FlatMappingIterator(this, f) }
+	// Implemented using FlatMappingIterator because MappingIterator has not been defined yet
+	map(f) { return new FlatMappingIterator(this, i => new SingleItemIterator(f(i))); }
+	flatMap(f) { return new FlatMappingIterator(this, f); }
 	filter(f) { 
 		return new FlatMappingIterator(this, i => {
 			if (f(i))
-				return new SingleItemIterator(i)
+				return new SingleItemIterator(i);
 			else
-				return new EmptyIterator()
+				return new EmptyIterator();
 		})
 	}
 }
@@ -205,143 +221,150 @@ export class MappingIterator extends IteratorWrapper {
 	// CONSTRUCTOR	---------------------------
 
 	// Accepts: 
-	// - source: Iterator - Iterator being mapped
-	// - f: Any => Any - Mapping function to apply
+	// 		- source: Iterator - Iterator being mapped
+	// 		- f: Any => Any - Mapping function to apply
 	constructor(source, f) {
 		super(source)
 		this._map = f
 	}
 
+
 	// IMPLEMENTED	--------------------------
 
-	next() { return this._map(this._source.next()) }
+	next() { return this._map(this._source.next()); }
 
 	map(f) { return new MappingIterator(this, f) }
 	flatMap(f) { return new FlatMappingIterator(this, f) }
 	filter(f) { 
 		return this.flatMap(i => {
 			if (f(i))
-				return new SingleItemIterator(i)
+				return new SingleItemIterator(i);
 			else
-				return new EmptyIterator()
+				return new EmptyIterator();
 		}) 
 	}
 }
 
+// A filtering iterator
 class SkippingIterator extends IteratorWrapper {
 	constructor(source, takeCondition) {
-		super(source)
-		this._condition = takeCondition
-
-		this._cached = null
+		super(source);
+		this._condition = takeCondition;
+		this._cached = null;
 	}
 
 	get poll() {
 		while (this._cached == null && this._source.hasNext) {
-			const candidate = this._source.next()
+			const candidate = this._source.next();
 			if (this._condition(candidate))
-				this._cached = candidate
+				this._cached = candidate;
 		}
-		return this._cached
+		return this._cached;
 	}
 
-	get hasNext() { return this.poll != null }
+	get hasNext() { return this.poll != null; }
 	next() {
-		const result = this.poll
-		this._cached = null
-		return result
+		const result = this.poll;
+		this._cached = null;
+		return result;
 	}
 
-	map(f) { return new MappingIterator(this, f) }
-	flatMap(f) { return new FlatMappingIterator(this, f) }
-	filter(f) { return new SkippingIterator(this, f) }
+	map(f) { return new MappingIterator(this, f); }
+	flatMap(f) { return new FlatMappingIterator(this, f); }
+	filter(f) { return new SkippingIterator(this, f); }
 }
 
 export class InfiniteIterator extends IteratorLike {
 	constructor(getNext) {
-		super()
-		this._getNext = getNext
+		super();
+		this._getNext = getNext;
 	}
 
-	get hasNext() { return true }
-	next() { return this._getNext() }
+	get hasNext() { return true; }
+	next() { return this._getNext(); }
 
-	map(f) { return new InfiniteIterator(() => f(this.next())) }
-	flatMap(f) { return new FlatMappingIterator(this, f) }
-	filter(f) { return new SkippingIterator(this, f) }
-	drop() { return this }
+	map(f) { return new InfiniteIterator(() => f(this.next())); }
+	flatMap(f) { return new FlatMappingIterator(this, f); }
+	filter(f) { return new SkippingIterator(this, f); }
+	drop() { return this; }
 }
 
 // A type of infinite iterator that keeps transforming the last value
 // Only calls the transformation function when next() is called
 export class FunctionalIterator extends IteratorLike {
 	// Accepts:
-	// - start: Any - First value to return
-	// - transform: Any => Any - Function that takes the last value and produces the next value
+	// 		- start: Any - First value to return
+	// 		- transform: Any => Any - Function that takes the last value and produces the next value
 	constructor(start, transform) {
-		super()
-		this._start = start
-		this._transform = transform
-		this._last = start
-		this._started = false
+		super();
+		this._start = start;
+		this._transform = transform;
+		this._last = start;
+		this._started = false;
 	}
 
-	get hasNext() { return true }
+	get hasNext() { return true; }
 	next() {
 		if (this._started) {
-			const nextVal = this._transform(this._last)
-			this._last = nextVal
-			return nextVal
+			const nextVal = this._transform(this._last);
+			this._last = nextVal;
+			return nextVal;
 		}
 		else {
-			this._started = true
-			return this._start
+			this._started = true;
+			return this._start;
 		}
 	}
 
-	map(f) { return new MappingIterator(this, f) }
-	flatMap(f) { return new FlatMappingIterator(this, f) }
-	filter(f) { return new SkippingIterator(this, f) }
+	map(f) { return new MappingIterator(this, f); }
+	flatMap(f) { return new FlatMappingIterator(this, f); }
+	filter(f) { return new SkippingIterator(this, f); }
 }
 
 class LimitedLengthIterator extends IteratorWrapper {
 	constructor(source, maxLength = 0) {
-		super(source)
-		this._remaining = maxLength
+		super(source);
+		this._remaining = maxLength;
 	}
 
-	get hasNext() { return this._remaining > 0 && this._source.hasNext }
+	get hasNext() { return this._remaining > 0 && this._source.hasNext; }
 	next() {
-		this._remaining -= 1
-		return this._source.next()
+		this._remaining -= 1;
+		return this._source.next();
 	}
 
 	take(amount) {
 		if (this._remaining > amount)
-			this._remaining = amount
-		return this
+			this._remaining = amount;
+		return this;
 	}
-	map(f) { return new MappingIterator(this, f) }
-	flatMap(f) { return new FlatMappingIterator(this, f) }
-	filter(f) { return new SkippingIterator(this, f) }
+
+	map(f) { return new MappingIterator(this, f); }
+	flatMap(f) { return new FlatMappingIterator(this, f); }
+	filter(f) { return new SkippingIterator(this, f); }
 }
 
 // A common abstract class for all iterators (have hasNext and next())
 export class Iterator extends IteratorLike {
-	static empty = new EmptyIterator()
+	// STATIC	----------------------
 
-	static once(item) { return new SingleItemIterator(item) }
-	static continually(generator) { return new InfiniteIterator(generator) }
-	static iterate(start, transform) { return new FunctionalIterator(start, transform) }
+	static empty = new EmptyIterator();
+
+	static once(item) { return new SingleItemIterator(item); }
+	static continually(generator) { return new InfiniteIterator(generator); }
+	static iterate(start, transform) { return new FunctionalIterator(start, transform); }
+
+
+	// IMPLEMENTED	------------------
 
 	take(amount) { 
 		if (amount <= 0)
-			return new EmptyIterator()
+			return new EmptyIterator();
 		else
-			return new LimitedLengthIterator(this, amount) 
+			return new LimitedLengthIterator(this, amount); 
 	}
-	map(f) { return new MappingIterator(this, f) }
-	flatMap(f) { return new FlatMappingIterator(this, f) }
-	filter(f) { return new SkippingIterator(this, f) }
-	filterNot(f) { return this.filter(i => !f(i)) }
+	map(f) { return new MappingIterator(this, f); }
+	flatMap(f) { return new FlatMappingIterator(this, f); }
+	filter(f) { return new SkippingIterator(this, f); }
+	filterNot(f) { return this.filter(i => !f(i)); }
 }

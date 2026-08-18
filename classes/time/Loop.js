@@ -25,9 +25,9 @@ export class Loop {
 
 	// Creates a new loop and starts it immediately
 	// Accepts: 
-	// interval: Duration - time interval between function calls
-	// action: () => Boolean - Action to perform (see constructor)
-	// immediately: Boolean - Whether the action should be run immediately (true) or after first wait (false, default)
+	// 		interval: Duration - time interval between function calls
+	// 		action: () => Boolean - Action to perform (see constructor)
+	// 		immediately: Boolean - Whether the action should be run immediately (true) or after first wait (false, default)
 	// Returns: Newly created (and started) loop instance
 	static start(interval, action, immediately = false) {
 		const instance = new Loop(interval, action)
@@ -37,10 +37,10 @@ export class Loop {
 
 	// Creates a new loop that continues as long as the specified condition returns true
 	// Accepts:
-	// interval: Duration - See constructor
-	// action: () => () - A function to run regularly
-	// continueCheck: () => Boolean - A function that returns true as long as the action should be repeated
-	// immediately: Boolean = see start
+	// 		interval: Duration - See constructor
+	// 		action: () => () - A function to run regularly
+	// 		continueCheck: () => Boolean - A function that returns true as long as the action should be repeated
+	// 		immediately: Boolean = see start
 	// Returns: Newly created (and started) loop instance 
 	static while(interval, action, continueCheck = () => true, immediately = false) {
 		return Loop.start(interval, () => {
@@ -84,7 +84,9 @@ export class Loop {
 		this.waitId = None
 	}
 
-	// Private
+
+	// PRIVATE	--------------------------
+
 	// Continues loop. Recursive.
 	_continue(thisRef) { 
 		// Always remembers the latest wait id so that the loop may be cancelled / stopped
