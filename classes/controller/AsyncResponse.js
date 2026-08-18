@@ -59,7 +59,7 @@ export class AsyncResponse {
 	// OTHER	------------------------------------
 
 	// Access to wrapped promise functions
-	then(onResolve = a => a, onReject = function(e) { throw e }) { return this.wrapped.then(onResolve, onReject) }
+	then(onResolve = a => a, onReject = function(e) { throw e; }) { return this.wrapped.then(onResolve, onReject) }
 	catch(onReject) { return this.wrapped.catch(onReject) }
 	text() { return this.wrapped.text() }
 
@@ -96,8 +96,8 @@ export class AsyncResponse {
 			else
 				return response.text().then(t => new Option(t)).catch(() => None)
 					.then(t => t.match(
-						text => throw new Error(text), 
-						() => throw new Error(statusMessage(response.status))))
+						text => { throw new Error(text); }, 
+						() => { throw new Error(statusMessage(response.status)); }))
 		}
 		else {
 			console.log(`Asyncresponse wrapping type: ${typeof response}`)

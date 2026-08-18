@@ -255,6 +255,7 @@ export class Iterable {
 	flattenWith(builder = this.newBuilder()) { return this.flatMap(a => a, builder); }
 	
 	// Maps the items in this iterable asynchronously (using await)
+	// In expected use-cases, f yields a Promise
 	async asyncMap(f, builder = this.newBuilder()) {
 		const iter = this.iterator();
 		while (iter.hasNext) {
@@ -267,7 +268,16 @@ export class Iterable {
 	}
 	// Maps the items in this collection in parallel. Uses await.
 	async mapParallel(f, builder = this.newBuilder()) {
-		return this.map(a => Promise.resolve(f(a))).map(promise => await promise);
+		// Starts the execution of 'f' for each item in this collection
+		const arrBuilder = new ArrayBuilder();
+		this.foreach(a => arrBuilder.addOne(Promise.resolve(f(a))));
+		
+		// Waits for the Promises to resolve
+		const resultArray = await Promise.all(arrBuilder.result());
+
+		// Yields the result in the correct collection type
+		builder.add(resultArray);
+		return builder.result();
 	}
 
 	// Combines this collection with another

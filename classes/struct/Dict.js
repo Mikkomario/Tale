@@ -163,7 +163,7 @@ export class Dict extends IterableWithOption {
 	// Returns value for key (option)
 	get(key) { return this._pairs.find(p => p.first === key).map(p => p.second) }
 	// Returns value for key, throws if not found
-	apply(key) { return this.get(key).match(v => v, () => throw new Error('No value for key: ' + key)) }
+	apply(key) { return this.get(key).match(v => v, () => { throw new Error('No value for key: ' + key); }) }
 	// Gets the value for key as a vector. Used with multi maps. If this map didn't contain that key, returns an empty vector.
 	getVector(key) {
 		return this.get(key).match(

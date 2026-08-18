@@ -59,7 +59,7 @@ export class Try {
 
 	// The successful value of this try. Fails on failure.
 	get get() {
-		this.failure.foreach(e => throw e);
+		this.failure.foreach(e => { throw e; });
 		return this._value;
 	}
 

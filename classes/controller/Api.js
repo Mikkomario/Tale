@@ -79,7 +79,7 @@ export class Authorization
 	// Combines two Authorizations so that another authorization is used when the first one fails
 	static combo(primaryAuth, secondaryAuth) {
 		return new Authorization(() => primaryAuth.token.catch(error => { 
-			return secondaryAuth.token.catch(() => throw error) 
+			return secondaryAuth.token.catch(() => { throw error; }) 
 		}))
 	}
 

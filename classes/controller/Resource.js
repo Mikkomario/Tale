@@ -92,7 +92,7 @@ export class Resource {
 						console.log(error)
 						return cached
 					}, 
-					() => throw error)))
+					() => { throw error; })))
 	}
 	// Updates the value in this cache
 	set value(newValue) { this._store(newValue) }

@@ -1,0 +1,35 @@
+{
+  "name": "utopia-tale",
+  "version": "0.1.0",
+  "type": "module", 
+  "description": "Contains data structures and other utility functions, somewhat similar to Utopia modules in Scala.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js", 
+  "exports": {
+      ".": "./dist/index.js"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest",
+    "dev": "vite build --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Mikkomario/Tale.git"
+  },
+  "author": "Mikko Hilpinen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mikkomario/Tale/issues"
+  },
+  "homepage": "https://github.com/Mikkomario/Tale#readme",
+  "devDependencies": {
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
+  }
+}
