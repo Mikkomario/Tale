@@ -1,6 +1,7 @@
-import { Iterator } from '@/classes/tale/struct/Iterator'
-import { ArrayIterator } from '@/classes/tale/struct/ArrayIterator'
-import { Vector } from '@/classes/tale/struct/Vector'
+import { describe, test, expect } from 'vitest'
+import { Iterator } from '@/classes/struct/Iterator'
+import { ArrayIterator } from '@/classes/struct/ArrayIterator'
+import { Vector } from '@/classes/struct/Vector'
 
 describe('Iterator', () => {
 	const v = new Vector([1, 2, 3])
@@ -45,14 +46,14 @@ describe('Iterator', () => {
 		Iterator.once(2).foreach(i => calls += i)
 		expect(calls).toBe(2)
 
-		v.iterator.foreach(i => calls += i)
+		v.iterator().foreach(i => calls += i)
 		expect(calls).toBe(8)
 	})
 
 	test('toArray', () => {
 		const arr1 = Iterator.empty.toArray
 		const arr2 = Iterator.once(1).toArray
-		const arr3 = v.iterator.toArray
+		const arr3 = v.iterator().toArray
 
 		expect(arr1.length).toBe(0)
 		expect(arr2.length).toBe(1)
@@ -69,7 +70,7 @@ describe('Iterator', () => {
 		iter.drop(1)
 		expect(iter.hasNext).toBe(false)
 
-		const iter2 = v.iterator
+		const iter2 = v.iterator()
 		expect(iter2.hasNext).toBe(true)
 		iter2.drop(2)
 		expect(iter2.hasNext).toBe(true)
@@ -83,7 +84,7 @@ describe('Iterator', () => {
 		expect(iter1.next()).toBe(1)
 		expect(iter1.hasNext).toBe(false)
 
-		const iter2 = v.iterator.take(2)
+		const iter2 = v.iterator().take(2)
 		expect(iter2.hasNext).toBe(true)
 		expect(iter2.next()).toBe(1)
 		expect(iter2.next()).toBe(2)
@@ -102,7 +103,7 @@ describe('Iterator', () => {
 		const iter2 = Iterator.empty.map(i => i + 1)
 		expect(iter2.hasNext).toBe(false)
 
-		const iter3 = v.iterator.map(i => -i)
+		const iter3 = v.iterator().map(i => -i)
 		expect(iter3.hasNext).toBe(true)
 		expect(iter3.next()).toBe(-1)
 		expect(iter3.next()).toBe(-2)
@@ -116,7 +117,7 @@ describe('Iterator', () => {
 		expect(iter.next()).toBe(2)
 		expect(iter.hasNext).toBe(false)
 
-		const iter2 = v.iterator.flatMap(i => new Vector([i, -i]))
+		const iter2 = v.iterator().flatMap(i => new Vector([i, -i]))
 		expect(iter2.hasNext).toBe(true)
 		expect(iter2.next()).toBe(1)
 		expect(iter2.next()).toBe(-1)
@@ -137,7 +138,7 @@ describe('Iterator', () => {
 		const iter2 = Iterator.once(1).filter(i => i < 0)
 		expect(iter2.hasNext).toBe(false)
 
-		const iter3 = v.iterator.filter(i => i % 2 != 0)
+		const iter3 = v.iterator().filter(i => i % 2 != 0)
 		expect(iter3.hasNext).toBe(true)
 		expect(iter3.next()).toBe(1)
 		expect(iter3.hasNext).toBe(true)
@@ -155,7 +156,7 @@ describe('Iterator', () => {
 	})
 
 	test('nextOption', () => {
-		const iter = v.iterator
+		const iter = v.iterator()
 		expect(iter.nextOption().get).toBe(1)
 		expect(iter.nextOption().get).toBe(2)
 		expect(iter.nextOption().get).toBe(3)
@@ -163,10 +164,10 @@ describe('Iterator', () => {
 	})
 
 	test('find', () => {
-		const iter = v.iterator
+		const iter = v.iterator()
 		expect(iter.find(i => i > 3).isDefined).toBe(false)
 
-		const res = v.iterator.find(i => i == 3)
+		const res = v.iterator().find(i => i == 3)
 		expect(res.isDefined).toBe(true)
 		expect(res.get).toBe(3)
 	})

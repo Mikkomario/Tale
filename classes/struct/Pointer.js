@@ -56,7 +56,7 @@ export class Pointer {
 		if (newValue !== oldValue && (this._listeners.nonEmpty || this._namedListeners.nonEmpty)) {
 			const event = new ChangeEvent(oldValue, newValue)
 			this._listeners.foreach(listener => listener(event));
-			this._namedListeners.valuesIterator.foreach(listener => listener(event));
+			this._namedListeners.valuesIterator().foreach(listener => listener(event));
 		}
 	}
 

@@ -1,4 +1,5 @@
-import { Pointer } from '@/classes/tale/struct/Pointer'
+import { describe, test, expect } from 'vitest'
+import { Pointer } from '@/classes/struct/Pointer'
 
 describe('Pointer', () => {
 	test('get and set value', () => {

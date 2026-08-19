@@ -1,6 +1,7 @@
-import { ArrayWrapper } from '@/classes/tale/struct/ArrayWrapper'
-import { Vector } from '@/classes/tale/struct/Vector'
-import { Range } from '@/classes/tale/struct/Range'
+import { describe, test, expect } from 'vitest'
+import { ArrayWrapper } from '@/classes/struct/ArrayWrapper.js'
+import { Vector } from '@/classes/struct/Vector.js'
+import { Range } from '@/classes/struct/Range.js'
 
 describe('ArrayWrapper', () => {
 	test('size', () => {
@@ -50,7 +51,7 @@ describe('ArrayWrapper', () => {
 	})
 
 	test('Iterator', () => {
-		const iter = new ArrayWrapper(['a', 'b']).iterator
+		const iter = new ArrayWrapper(['a', 'b']).iterator();
 
 		expect(iter.hasNext).toBe(true)
 		expect(iter.next()).toBe('a')

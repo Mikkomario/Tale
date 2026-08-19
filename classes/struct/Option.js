@@ -35,9 +35,9 @@ export class Option extends Iterable {
 	//		b) f yields None, undefined or null
 	static resolve(f) {
 		if (typeof f === 'function')
-			return flat(f());
+			return this.flat(f());
 		else
-			return none;
+			return this.none;
 	}
 
 

@@ -1,11 +1,12 @@
-import { Vector, VectorBuilder } from '@/classes/tale/struct/Vector'
-import { ArrayBuilder } from '@/classes/tale/struct/Iterable'
+import { describe, test, expect } from 'vitest'
+import { Vector, VectorBuilder } from '@/classes/struct/Vector'
+import { ArrayBuilder } from '@/classes/struct/Iterable'
 
 describe('Vector', () => {
 	const v = new Vector([1, 2, 3]);
 
 	test('iterator', () => {
-		const iter = v.iterator;
+		const iter = v.iterator();
 
 		expect(iter.hasNext).toBe(true);
 		expect(iter.next()).toBe(1);
@@ -192,7 +193,13 @@ describe('Vector', () => {
 		expect(v2.get(2)).toBe(3);
 	})
 	test('distinctBy', () => {
-		const v2 = v.distinctBy((a, b) => (a % 2) == (b % 2));
+		const v2 = v.distinctBy(a => a % 2);
+		expect(v2.size).toBe(2);
+		expect(v2.head).toBe(1);
+		expect(v2.get(1)).toBe(2);
+	})
+	test('distinctWith', () => {
+		const v2 = v.distinctWith((a, b) => (a % 2) == (b % 2));
 		expect(v2.size).toBe(2);
 		expect(v2.head).toBe(1);
 		expect(v2.get(1)).toBe(2);
@@ -276,7 +283,7 @@ describe('Vector', () => {
 		expect(i.first).toBe(0)
 		expect(i.last).toBe(2)
 
-		const iter = i.iterator
+		const iter = i.iterator()
 
 		expect(iter.next()).toBe(0)
 		expect(iter.next()).toBe(1)

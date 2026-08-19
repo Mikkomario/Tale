@@ -128,11 +128,10 @@ export class SingleItemIterator extends IteratorLike {
 		// TODO: Could add a lazy implementation of this
 		if (this.hasNext) {
 			const mapped = f(this._item);
-			const getIter = mapped.iterator;
-			if (typeof getIter !== 'function')
-				return new SingleItemIterator(mapped);
+			if (typeof mapped.iterator === 'function')
+				return mapped.iterator();
 			else
-				return getIter();
+				return new SingleItemIterator(mapped);
 		}
 		else
 			return this;
@@ -180,15 +179,14 @@ class FlatMappingIterator extends IteratorWrapper {
 	}
 
 
-	// COMPUTED	-------------------------
+	// OTHER	-------------------------
 
 	// Acquires the next available iterator, if possible
 	_pollIter() {
 		while ((this._cachedIter === null || !this._cachedIter.hasNext) && this._source.hasNext) {
 			const mappedNext = this._map(this._source.next());
-			const getNextIter = mappedNext.iterator;
-			if (typeof getNextIter === 'function')
-				this._cachedIter = getNextIter();
+			if (typeof mappedNext.iterator === 'function')
+				this._cachedIter = mappedNext.iterator();
 			else
 				this._cachedIter = new SingleItemIterator(mappedNext);
 		}

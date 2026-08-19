@@ -1,5 +1,6 @@
-import { Lazy } from '@/classes/tale/struct/Lazy'
-import { Iterator } from '@/classes/tale/struct/Iterator'
+import { describe, test, expect } from 'vitest'
+import { Lazy } from '@/classes/struct/Lazy'
+import { Iterator } from '@/classes/struct/Iterator'
 
 describe('Lazy', () => {
 	function newIter() { 

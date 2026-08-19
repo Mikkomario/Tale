@@ -1,7 +1,8 @@
-import { Option, None } from '@/classes/tale/struct/Option'
-import { Vector } from '@/classes/tale/struct/Vector'
-import { ArrayWrapper } from '@/classes/tale/struct/ArrayWrapper'
-import { Pair } from '@/classes/tale/struct/Pair'
+import { describe, test, expect } from 'vitest'
+import { Option, None } from '@/classes/struct/Option'
+import { Vector } from '@/classes/struct/Vector'
+import { ArrayWrapper } from '@/classes/struct/ArrayWrapper'
+import { Pair } from '@/classes/struct/Pair'
 
 describe('Seq', () => {
 	const v = new Vector([1, 2, 3])
@@ -37,7 +38,7 @@ describe('Seq', () => {
 	test('reverseIterator', () => {
 		function testReverse(c, expected) {
 			const e = new ArrayWrapper(expected)
-			const iter = c.reverseIterator
+			const iter = c.reverseIterator()
 
 			expect(iter.hasNext).toBe(true)
 			while (iter.hasNext) {

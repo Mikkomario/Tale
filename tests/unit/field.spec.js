@@ -1,7 +1,8 @@
 // Tests the Field class
 
-import { Option } from '@/classes/tale/struct/Option'
-import { Field } from '@/classes/tale/component/Field'
+import { describe, test, expect } from 'vitest'
+import { Option } from '@/classes/struct/Option'
+import { Field } from '@/classes/component/Field'
 
 describe('Field', () => {
 	test('value set and acquisition', () => {

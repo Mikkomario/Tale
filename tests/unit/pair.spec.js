@@ -1,4 +1,5 @@
-import { Pair } from '@/classes/tale/struct/Pair'
+import { describe, test, expect } from 'vitest'
+import { Pair } from '@/classes/struct/Pair'
 
 describe('Pair', () => {
 	const p = new Pair(1, 2);
@@ -16,7 +17,7 @@ describe('Pair', () => {
 	})
 
 	test('iteration', () => {
-		const iter = p.iterator;
+		const iter = p.iterator();
 		expect(iter.next()).toBe(1);
 		expect(iter.next()).toBe(2);
 		expect(iter.hasNext).toBe(false);

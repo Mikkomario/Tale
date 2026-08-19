@@ -1,5 +1,6 @@
-import { RichDate } from '@/classes/tale/time/RichDate'
-import { hours, minutes } from '@/classes/tale/time/Duration'
+import { describe, test, expect } from 'vitest'
+import { RichDate } from '@/classes/time/RichDate'
+import { hours, minutes } from '@/classes/time/Duration'
 
 describe('RichDate', () => {
 	const origin = new RichDate('2021-07-10T12:09');

@@ -1,6 +1,7 @@
-import { divideWith, divideBy } from '@/classes/tale/struct/CollectionFunctions'
-import { Vector } from '@/classes/tale/struct/Vector'
-import { Left, Right } from '@/classes/tale/struct/Either'
+import { describe, test, expect } from 'vitest'
+import { divideWith, divideBy } from '@/classes/struct/CollectionFunctions'
+import { Vector } from '@/classes/struct/Vector'
+import { Left, Right } from '@/classes/struct/Either'
 
 describe('CollectionFunctions', () => {
 	const v = new Vector([1, 2, 3, 4, 5])

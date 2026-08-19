@@ -1,6 +1,7 @@
-import { Dict } from '@/classes/tale/struct/Dict'
-import { Vector } from '@/classes/tale/struct/Vector'
-import { Pair } from '@/classes/tale/struct/Pair'
+import { describe, test, expect } from 'vitest'
+import { Dict } from '@/classes/struct/Dict'
+import { Vector } from '@/classes/struct/Vector'
+import { Pair } from '@/classes/struct/Pair'
 
 describe('Dict', () => {
 	const d = new Dict(new Vector([new Pair('a', 1), new Pair('b', 2)]));
@@ -49,7 +50,7 @@ describe('Dict', () => {
 	})
 
 	test('iterator', () => {
-		const iter = d.iterator;
+		const iter = d.iterator();
 		const h = iter.next();
 
 		expect(h instanceof Pair).toBe(true);

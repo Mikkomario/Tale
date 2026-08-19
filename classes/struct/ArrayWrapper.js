@@ -10,16 +10,18 @@ import { Left, Right } from './Either'
 // Return Either Left: The items if singular or Right: The items as an array, if possible
 function tryArray(items) {
 	if (Array.isArray(items))
-		return Right(items)
+		return Right(items);
 	// Converts undefined and null to an empty array
 	else if (items === undefined || items === null)
-		return Right([])
+		return Right([]);
 	else {
 		const otherArray = items.toArray
 		if (otherArray !== undefined)
-			return Right(otherArray)
+			return Right(otherArray);
+		else if (typeof items.iterator === 'function')
+			return Right(items.iterator().toArray);
 		else
-			return Option.resolve(items.iterator).match(iter => Right(iter.toArray), () => Left(items));
+			return Left(items);
 	}
 }
 
@@ -80,14 +82,12 @@ export class ArrayWrapper extends Seq {
 	addOne(item) { this.array.push(item) }
 	// Appends one or more items at the end of this array
 	add(items) {
-		Option.resolve(items.iterator).match(
-			iter => iter.foreach(item => this.array.push(item)), 
-			() => {
-				if (Array.isArray(items))
-					items.forEach(item => this.array.push(item));
-				else
-					this.array.push(items);
-			});
+		if (typeof items.iterator === 'function')
+			items.iterator().foreach(item => this.array.push(item));
+		else if (Array.isArray(items))
+			items.forEach(item => this.array.push(item));
+		else
+			this.array.push(items);
 	}
 	// Appends one item at the end of this array (alias for addOne(...))
 	pushOne(item) { this.addOne(item) }

@@ -1,5 +1,6 @@
-import { Some } from '@/classes/tale/struct/Option'
-import { Try, Success, Failure } from '@/classes/tale/struct/Try.js'
+import { describe, test, expect } from 'vitest'
+import { Some } from '@/classes/struct/Option'
+import { Try, Success, Failure } from '@/classes/struct/Try.js'
 
 describe('Try', () => {
 	// Success and failure value acquisition
@@ -57,7 +58,7 @@ describe('Try', () => {
 	test('apply', () => {
 		const s1 = Try.apply(() => 1);
 		const s2 = Try.apply(2);
-		const f1 = Try.apply(() => throw new Error('test error'));
+		const f1 = Try.apply(() => { throw new Error('test error'); });
 
 		expect(s1.isSuccess).toBe(true);
 		expect(s1.get).toBe(1);

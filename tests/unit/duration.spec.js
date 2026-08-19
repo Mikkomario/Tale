@@ -1,4 +1,5 @@
-import { Duration, weeks, days, hours, minutes, seconds, millis } from '@/classes/tale/time/Duration'
+import { describe, test, expect } from 'vitest'
+import { Duration, weeks, days, hours, minutes, seconds, millis } from '@/classes/time/Duration'
 
 describe('Duration', () => {
 	test('constructor', () => {

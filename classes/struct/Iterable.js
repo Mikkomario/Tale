@@ -96,12 +96,9 @@ export class Iterable {
 
 	// Checks whether these two iterables have equal content
 	equals(other) {
-		const getOtherIter = other.iterator;
-		if (typeof getOtherIter !== 'function')
-			return false;
-		else {
+		if (typeof other.iterator === 'function') {
 			const iter = this.iterator();
-			const otherIter = getOtherIter();
+			const otherIter = other.iterator();
 			while (iter.hasNext && otherIter.hasNext) {
 				const a = iter.next();
 				const b = otherIter.next();
@@ -114,6 +111,8 @@ export class Iterable {
 			}
 			return iter.hasNext === otherIter.hasNext;
 		}
+		else
+			return false;
 	}
 	// Checks whether these two collections have equal mapped content
 	// Accepts: 
@@ -121,12 +120,9 @@ export class Iterable {
 	// 		- f: A => Any - A function that accepts an item in this or other collection and maps it to a comparable value
 	// Returns: Whether these collections have equal mapped content
 	equalsBy(other, f) {
-		const getOtherIter = other.iterator;
-		if (typeof getOtherIter !== 'function')
-			return false;
-		else {
+		if (typeof other.iterator === 'function') {
 			const iter = this.iterator();
-			const otherIter = getOtherIter();
+			const otherIter = other.iterator();
 			while (iter.hasNext && otherIter.hasNext) {
 				const a = f(iter.next());
 				const b = f(otherIter.next());
@@ -139,6 +135,8 @@ export class Iterable {
 			}
 			return iter.hasNext === otherIter.hasNext;
 		}
+		else
+			return false;
 	}
 
 	// Calls the specified function for each item
@@ -215,7 +213,7 @@ export class Iterable {
 	// 		- builder: Builder - Builder for creating the resulting collection (default = this collection's default builder)
 	// Returns: This collection without 'item' item (uses equals or == to test)
 	minusOne(item, builder = this.newBuilder()) {
-		if (typeof a.equals === 'function')
+		if (typeof item.equals === 'function')
 			return this.filterNot(i => item.equals(i));
 		else
 			return this.filterNot(i => i == item);
@@ -241,9 +239,8 @@ export class Iterable {
 	flatMap(f, builder = this.newBuilder()) {
 		this.foreach(a => {
 			const items = f(a);
-			const getIter = items.iterator;
-			if (typeof iter === 'function')
-				getIter().foreach(item => builder.addOne(item));
+			if (typeof items.iterator === 'function')
+				items.iterator().foreach(item => builder.addOne(item));
 			else if (Array.isArray(items))
 				items.forEach(item => builder.addOne(item));
 			else

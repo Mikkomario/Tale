@@ -1,4 +1,5 @@
-import { Range, RangeIterator } from '@/classes/tale/struct/Range'
+import { describe, test, expect } from 'vitest'
+import { Range, RangeIterator } from '@/classes/struct/Range'
 
 describe('RangeIterator', () => {
 	function newIter() { return new RangeIterator(1, 5, 2) }
@@ -112,14 +113,14 @@ describe('Range', () => {
 	})
 
 	test('iteration', () => {
-		const iter1 = r.iterator
+		const iter1 = r.iterator()
 		expect(iter1.hasNext).toBe(true)
 		expect(iter1.next()).toBe(1)
 		expect(iter1.next()).toBe(3)
 		expect(iter1.next()).toBe(5)
 		expect(iter1.hasNext).toBe(false)
 
-		const iter2 = r2.iterator
+		const iter2 = r2.iterator()
 		expect(iter2.hasNext).toBe(true)
 		expect(iter2.next()).toBe(3)
 		expect(iter2.next()).toBe(2)

@@ -1,9 +1,10 @@
-import { Vector } from '@/classes/tale/struct/Vector'
-import { Option, Some, None } from '@/classes/tale/struct/Option'
-import { Range } from '@/classes/tale/struct/Range'
-import { Dict } from '@/classes/tale/struct/Dict'
-import { Pair } from '@/classes/tale/struct/Pair'
-import { ArrayWrapper } from '@/classes/tale/struct/ArrayWrapper'
+import { describe, test, expect } from 'vitest'
+import { Vector } from '@/classes/struct/Vector'
+import { Option, Some, None } from '@/classes/struct/Option'
+import { Range } from '@/classes/struct/Range'
+import { Dict } from '@/classes/struct/Dict'
+import { Pair } from '@/classes/struct/Pair'
+import { ArrayWrapper } from '@/classes/struct/ArrayWrapper'
 
 describe('Iterable', () => {
 	const o = Some(1)
@@ -21,7 +22,7 @@ describe('Iterable', () => {
 	const p2 = new Pair(p, p.reverse)
 	const a2 = new ArrayWrapper([v, v])
 
-	function newIter() { return v.iterator }
+	function newIter() { return v.iterator() }
 
 	function positive(i) { return i > 0 }
 	function negative(i) { return i < 0 }
@@ -36,7 +37,7 @@ describe('Iterable', () => {
 	}
 	function testMutate(c, mutate, expected, typeCondition = a => true) {
 		const alt = mutate(c)
-		const iter = alt.iterator
+		const iter = alt.iterator()
 		expect(typeCondition(alt)).toBe(true)
 		expect(iter.hasNext === undefined).toBe(false)
 		for (let i = 0; i < expected.length; i++) {
@@ -303,7 +304,7 @@ describe('Iterable', () => {
 		testDrop(d, 3, [], a => a instanceof Dict)
 		const dropped = a.drop(2)
 		expect(dropped.size).toBe(1)
-		const iter = dropped.iterator
+		const iter = dropped.iterator()
 		expect(iter.hasNext).toBe(true)
 		expect(iter.next()).toBe(3)
 		expect(iter.hasNext).toBe(false)

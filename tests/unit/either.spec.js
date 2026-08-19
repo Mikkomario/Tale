@@ -1,4 +1,5 @@
-import { Left, Right } from '@/classes/tale/struct/Either'
+import { describe, test, expect } from 'vitest'
+import { Left, Right } from '@/classes/struct/Either'
 
 describe('Either', () => {
 	const l = Left(1)

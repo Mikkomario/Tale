@@ -1,20 +1,5 @@
-/*
-import { shallowMount } from '@vue/test-utils'
-import HelloWorld from '@/components/HelloWorld.vue'
-
-describe('HelloWorld.vue', () => {
-  it('renders props.msg when passed', () => {
-    const msg = 'new message'
-    const wrapper = shallowMount(HelloWorld, {
-      props: { msg }
-    })
-    expect(wrapper.text()).toMatch(msg)
-  })
-})
-
-*/
-
-import { Option, None, Some } from '@/classes/tale/struct/Option'
+import { describe, test, expect } from 'vitest'
+import { Option, None, Some } from '@/classes/struct/Option'
 
 describe('Option', () => {
 	const newEmpty = new Option(null);
@@ -202,12 +187,12 @@ describe('Option', () => {
 	})
 
 	test('iterator', () => {
-		const iter1 = Some(1).iterator
+		const iter1 = Some(1).iterator()
 		expect(iter1.hasNext).toBe(true)
 		expect(iter1.next()).toBe(1)
 		expect(iter1.hasNext).toBe(false)
 
-		expect(None.iterator.hasNext).toBe(false)
+		expect(None.iterator().hasNext).toBe(false)
 	})
 
 	test('getOrElse', () => {

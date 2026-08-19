@@ -1,6 +1,7 @@
-import { millis } from '@/classes/tale/time/Duration'
-import { Loop } from '@/classes/tale/time/Loop'
-import { Wait } from '@/classes/tale/time/Wait'
+import { describe, test, expect } from 'vitest'
+import { millis } from '@/classes/time/Duration'
+import { Loop } from '@/classes/time/Loop'
+import { Wait } from '@/classes/time/Wait'
 
 describe('Loop', () => {
 	test('start(), isRunning and stop()', done => {

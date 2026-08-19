@@ -1,5 +1,6 @@
-import { StatefulPromise, Stateful } from '@/classes/tale/async/StatefulPromise'
-import { Failure, Success } from '@/classes/tale/struct/Try'
+import { describe, test, expect } from 'vitest'
+import { StatefulPromise, Stateful } from '@/classes/async/StatefulPromise'
+import { Failure, Success } from '@/classes/struct/Try'
 
 describe('StatefulPromise', () => {
 	const testError = new Error('test');
@@ -10,23 +11,23 @@ describe('StatefulPromise', () => {
 	test('success test method', () => {
 		return expect(delaySuccess(1)).resolves.toBe(1);
 	})
-	test('failure test method', done => {
-		delayFailure().then(() => expect('error').toMatch('no error'), () => done());
+	test('failure test method', async () => {
+		await expect(delayFailure()).rejects.toBeDefined();
 	})
 
 	// Stateful
-	test('Stateful success', done => {
+	test('Stateful success', () => new Promise((resolve, reject) => {
 		Stateful(delaySuccess(1)).finally(r => r.match(s => {
 			expect(s).toBe(1);
-			done();
-		}, e => done(e)));
-	})
-	test('Stateful failure', done => {
+			resolve();
+		}, e => reject(e)));
+	}))
+	test('Stateful failure', () => new Promise(resolve => {
 		Stateful(delayFailure()).finally(r => {
 			expect(r.isFailure).toBe(true);
-			done();
+			resolve();
 		})
-	})
+	}))
 	test('Stateful returns StatefulPromise', () => {
 		const p = delaySuccess(1);
 		expect(p instanceof Promise).toBe(true);
@@ -38,7 +39,7 @@ describe('StatefulPromise', () => {
 	})
 
 	// Result & completion
-	test('state', done => {
+	test('state', async () => {
 		const promise = Stateful(delaySuccess(1));
 		expect(promise.isCompleted).toBe(false);
 		expect(promise.isPending).toBe(true);
@@ -48,100 +49,91 @@ describe('StatefulPromise', () => {
 		expect(promise.isSuccess).toBe(false);
 		expect(promise.isFailure).toBe(false);
 
-		async function f1() {
-			const result = await promise;
-			expect(result).toBe(1);
-			expect(promise.isCompleted).toBe(true);
-			expect(promise.isPending).toBe(false);
-			expect(promise.success.isDefined).toBe(true);
-			expect(promise.failure.isDefined).toBe(false);
-			expect(promise.isSuccess).toBe(true);
-			expect(promise.isFailure).toBe(false);
-			expect(promise.result.isDefined).toBe(true);
-
-			done();
-		}
-		f1();
+		const result = await promise;
+		expect(result).toBe(1);
+		expect(promise.isCompleted).toBe(true);
+		expect(promise.isPending).toBe(false);
+		expect(promise.success.isDefined).toBe(true);
+		expect(promise.failure.isDefined).toBe(false);
+		expect(promise.isSuccess).toBe(true);
+		expect(promise.isFailure).toBe(false);
+		expect(promise.result.isDefined).toBe(true);
 	})
 
 	// Reject & resolve
-	test('resolve', done => {
+	test('resolve', () => new Promise((resolve, reject) => {
 		StatefulPromise.resolve(1).finally(r => r.match(s => {
 			expect(s).toBe(1);
-			done();
-		}, e => done(e)))
-	})
-	test('reject', done => {
-		StatefulPromise.reject(testError).finally(r => r.match(() => expect('success').toMatch('no success'), () => done()));
-	})
+			resolve();
+		}, e => reject(e)))
+	}))
+	test('reject', () => new Promise((resolve, reject) => {
+		StatefulPromise.reject(testError).finally(r => r.match(
+			() => reject(new Error('Rejected promise should not resolve')), 
+			() => resolve()));
+	}))
 
 	// Stateful variants
-	test('Stateful function', done => {
-		Stateful(() => 1).finally(r => r.match(s => {
-			expect(s).toBe(1);
-			done();
-		}, e => done(e)))
-	})
-	test('Stateful value', done => {
+	test('Stateful function', () => new Promise((resolve, reject) => {
+		Stateful(() => 1).finally(r => r.match(
+			s => {
+				expect(s).toBe(1);
+				resolve();
+			}, 
+			e => reject(e)))
+	}))
+	test('Stateful value', () => new Promise((resolve, reject) => {
 		Stateful(1).finally(r => r.match(s => {
 			expect(s).toBe(1);
-			done();
-		}, e => done(e)));
-	})
+			resolve();
+		}, e => reject(e)));
+	}))
 
 	// Stateful then
-	test('thenWithState', done => {
+	test('thenWithState', async () => {
 		const first = Stateful(delaySuccess(1));
 		const second = first.thenWithState(i => delaySuccess(i + 1));
-		async function f1() {
-			const res1 = await first;
-			expect(res1).toBe(1);
-			expect(second.isCompleted).toBe(false);
+		
+		const res1 = await first;
+		expect(res1).toBe(1);
+		expect(second.isCompleted).toBe(false);
 
+		return new Promise((resolve, reject) => {
 			second.finally(r => r.match(s => {
 				expect(s).toBe(2);
-				done();
-			}, e => done(e)))
-		}
-		f1();
+				resolve();
+			}, e => reject(e)))
+		})
 	})
 
 	// Failure resolve handling
-	test('Failure in then', done => {
+	test('Failure in then', async () => {
 		// When returning Failure in resolve, treats it as a failure
-		new StatefulPromise(delaySuccess(Failure(testError))).then(() => expect('success').toMatch('Failure'), e => {
-			expect(e instanceof Error).toBe(true);
-			done();
-		});
+		await expect(new StatefulPromise(delaySuccess(Failure(testError)))).rejects.toBeDefined();
 	})
-	test('Failure in catch', done => {
+	test('Failure in catch', () => new Promise((resolve, reject) => {
 		new StatefulPromise(delaySuccess(Failure(testError))).catch(e => {
 			expect(e instanceof Error).toBe(true);
-			done();
+			resolve();
 		})
-	})
-	test('Failure in finally', done => {
+		// FIXME: Doesn't resolve if successful
+	}))
+	test('Failure in finally', () => new Promise ((resolve, reject) => {
 		new StatefulPromise(delaySuccess(Failure(testError))).finally(r => {
 			expect(r.isFailure).toBe(true);
-			done();
+			resolve();
 		});
+	}))
+	test('Failure in Stateful', async () => {
+		await expect(Stateful(Failure(testError))).rejects.toBeDefined();
 	})
-	test('Failure in Stateful', done => {
-		Stateful(Failure(testError)).then(() => expect('success').toMatch('failure'), e => {
-			expect(e instanceof Error).toBe(true);
-			done();
-		})
-	})
-	test('Success in Stateful', done => {
-		Stateful(Success(1)).then(i => {
-			expect(i).toBe(1);
-			done();
-		}, () => expect('failure').toMatch('success'))
+	test('Success in Stateful', async () => {
+		await expect(Stateful(Success(1))).resolves.toBe(1);
 	})
 
 	// Maps
-	test('map', done => {
-		Stateful(1).map(r => { 
+	test('map', async () => {
+		const mapped = Stateful(1).map(r => { 
 			expect(r.isSuccess).toBe(true);
 			expect(r.get).toBe(1);
 			return r.map(i => i + 1) 
@@ -156,14 +148,12 @@ describe('StatefulPromise', () => {
 			expect(r.isFailure).toBe(true);
 			expect(r.failure.get.message).toMatch('test2');
 			return 5;
-		}).finally(r => {
-			expect(r.isSuccess).toBe(true);
-			expect(r.get).toBe(5);
-			done();
-		})
+		});
+
+		await expect(mapped).resolves.toBe(5);
 	})
-	test('mapSuccess', done => {
-		Stateful(1).mapSuccess(i => {
+	test('mapSuccess', async () => {
+		const mapped = Stateful(1).mapSuccess(i => {
 			expect(i).toBe(1);
 			return i + 1;
 		}).mapSuccess(i => {
@@ -173,14 +163,13 @@ describe('StatefulPromise', () => {
 			expect(i).toBe(3);
 			return Failure(testError);
 		}).mapSuccess(() => {
-			expect('success').toMatch('failure');
-		}).finally(r => {
-			expect(r.isFailure).toBe(true);
-			done();
-		})
+			expect.unreachable('Should not be successful at this point');
+		});
+
+		await expect(mapped).rejects.toBeDefined();
 	})
-	test('mapFailure', done => {
-		Stateful(Failure(testError)).mapFailure(e => {
+	test('mapFailure', async () => {
+		const mapped = Stateful(Failure(testError)).mapFailure(e => {
 			expect(e instanceof Error).toBe(true);
 			throw e;
 		}).mapFailure(e => {
@@ -190,11 +179,10 @@ describe('StatefulPromise', () => {
 			expect(r.isFailure).toBe(true);
 			return 1;
 		}).mapFailure(() => {
-			expect('faiure').toMatch('success');
+			expect.unreachable('Should not be failed at this point')
 			return 1;
-		}).finally(r => {
-			expect(r.isSuccess).toBe(true);
-			done();
-		})
+		});
+
+		await expect(mapped).resolves.toBe(1);
 	})
 })

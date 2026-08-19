@@ -60,7 +60,7 @@ export class Seq extends IterableWithOption {
 			return Some(this.get(index));
 	}
 	// Alias for lift()
-	option(index) { return lift(index); }
+	option(index) { return this.lift(index); }
 
 	// Constructs a string based on this collection
 	// Accepts: 
