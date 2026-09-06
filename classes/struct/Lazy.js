@@ -17,12 +17,14 @@ export class Lazy {
 
 	// Wraps a function or a value in a lazy container
 	// Flattens possibly lazy wrapping
-	static flat(generator) {
+	static from(generator) {
 		if (generator instanceof Lazy)
 			return generator;
 		else
 			return new Lazy(generator);
 	}
+	// Deprecated for removal
+	static flat(generator) { return this.from(generator); }
 
 	// Creates a lazy container that uses a stateful promise
 	static async(generator) {

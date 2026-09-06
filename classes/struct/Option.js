@@ -22,12 +22,14 @@ export class Option extends Iterable {
 	static some(val) { return new Option(val); }
 
 	// Wraps the value in an Option, but doesn't wrap Options
-	static flat(val) {
+	static from(val) {
 		if (val instanceof Option)
 			return val;
 		else
 			return new Option(val);
 	}
+	// Deprecated for removal
+	static flat(val) { return this.from(val); }
 
 	// Safely resolves the specified function. 
 	// Yields None if:
@@ -35,7 +37,7 @@ export class Option extends Iterable {
 	//		b) f yields None, undefined or null
 	static resolve(f) {
 		if (typeof f === 'function')
-			return this.flat(f());
+			return this.from(f());
 		else
 			return this.none;
 	}
@@ -132,9 +134,9 @@ export class Option extends Iterable {
 	orElse(def) {
 		if (this.isEmpty) {
 			if (typeof def === 'function')
-				return Option.flat(def());
+				return Option.from(def());
 			else
-				return Option.flat(def);
+				return Option.from(def);
 		}
 		else
 			return this;

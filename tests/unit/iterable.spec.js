@@ -26,7 +26,7 @@ describe('Iterable', () => {
 
 	function positive(i) { return i > 0 }
 	function negative(i) { return i < 0 }
-	function one(i) { return i == 1 }
+	function one(i) { return i === 1 }
 
 	function testArray(c, expected) {
 		const arr = c.toArray
@@ -189,7 +189,7 @@ describe('Iterable', () => {
 		testEx(p, one)
 
 		testEx(d, p => p.second > 1)
-		testEx(d, p => p.first == 'z', false)
+		testEx(d, p => p.first === 'z', false)
 
 		testEx(r, positive)
 		testEx(r, negative, false)
@@ -224,7 +224,7 @@ describe('Iterable', () => {
 		testFor(p, one, false)
 
 		testFor(d, p => p.second > 0)
-		testFor(d, p => p.second == 1, false)
+		testFor(d, p => p.second === 1, false)
 
 		testFor(r, positive)
 		testFor(r, negative, false)
@@ -260,13 +260,19 @@ describe('Iterable', () => {
 		testC(a, -1, false)
 	})
 
+	test('count', () => {
+		expect(v.count(i => i > 1)).toBe(2);
+		expect(v.count(i => i > 3)).toBe(0);
+		expect(v.count(i => i === 1)).toBe(1);
+	})
+
 	test('take', () => {
 		function testTake(c, amount = 2, expectedSize = 2, typeCondition = a => true) {
 			const taken = c.take(amount)
 			expect(typeCondition(taken)).toBe(true)
-			if (taken.size != undefined)
+			if (taken.size !== undefined)
 				expect(taken.size).toBe(expectedSize)
-			else if (taken.length != undefined)
+			else if (taken.length !== undefined)
 				expect(taken.length).toBe(expectedSize)
 			else if (expectedSize > 0)
 				expect(taken.isEmpty).toBe(false)

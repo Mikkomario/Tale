@@ -1,12 +1,15 @@
 {
-  "name": "utopia-tale",
+  "name": "@mikkomario/tale",
   "version": "0.1.0",
-  "type": "module", 
+  "type": "module",
   "description": "Contains data structures and other utility functions, somewhat similar to Utopia modules in Scala.",
   "main": "./dist/index.js",
-  "module": "./dist/index.js", 
+  "module": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
   "exports": {
-      ".": "./dist/index.js"
+    ".": "./dist/index.js"
   },
   "directories": {
     "test": "tests"

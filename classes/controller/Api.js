@@ -239,7 +239,10 @@ export class Api {
 	// 		- root path: String, which is applied to all requests - should end in /
 	// 		- authorization: Authorization - For session management (default = automatic failure)
 	// 		- authFailureHandler: Option[() => Any] - Callback function for cases when authorization fails
-	constructor(baseUri, sessionAuthorization = Authorization.failure, languagePointer = new Pointer(None), authFailureHandler = None) {
+	//			- May receive an error, or a 401 response object
+	constructor(baseUri, sessionAuthorization = Authorization.failure,
+				languagePointer = new Pointer(None), authFailureHandler = None)
+	{
 		// Root path, including last / - String (immutable)
 		this._base = baseUri
 		// Session authorization logic (mutable)

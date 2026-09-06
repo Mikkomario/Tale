@@ -75,16 +75,18 @@ export class Vector extends Seq {
 	// Converts iterable items to vectors
 	// Wraps non-iterable items
 	// Converts nulls and undefineds to empty vectors
-	static flat(item) {
+	static from(item) {
 		if (item === null || item === undefined)
 			return Vector.empty;
 		if (item instanceof Vector)
 			return item;
+		else if (typeof item.iterator === 'function')
+			return item.iterator().to(new BuilderWrapper(new ArrayBuilder(), array => new Vector(array)));
 		else
-			return Option.resolve(item.iterator).match(
-				iter => iter.to(new BuilderWrapper(new ArrayBuilder(), array => new Vector(array))), 
-				() => new Vector(item))
+			return new Vector(item);
 	}
+	// Deprecated for removal
+	static flat(item) { return this.from(item); }
 
 
 	// COMPUTED	--------------------------------------

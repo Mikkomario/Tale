@@ -154,9 +154,9 @@ export class DeviceStorage {
 	}
 	// Registers a new slot
 	// Accepts: 
-	// name: String - Slot name
-	// fromValue: Any => Any - A function that accepts a raw stored value and returns a processed value
-	// toValue: Any => Any - A function that accepts a processed value and returns a raw value to store
+	// 		name: String - Slot name
+	// 		fromValue: Any => Any - A function that accepts a raw stored value and returns a processed value
+	// 		toValue: Any => Any - A function that accepts a processed value and returns a raw value to store
 	registerSlot(name, fromValue = a => a, toValue = a => a.valueOf()) {
 		// Won't register duplicate slots
 		if (this.slots.forall(slot => slot.name !== name))

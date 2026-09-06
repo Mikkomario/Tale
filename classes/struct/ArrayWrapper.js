@@ -45,11 +45,13 @@ export class ArrayWrapper extends Seq {
 	// item: Any - An item to wrap. May be of type Array or Iterable, or any other type
 	// 		- NonIterable / NonArray types are wrapped in an array
 	// Returns: A new ArrayWrapper from that item or collection of items
-	static flat(item) {
+	static from(item) {
 		return tryArray(item).match(
 			item => new ArrayWrapper([item]), 
 			array => new ArrayWrapper(array))
 	}
+	// Deprecated for removal
+	static flat(item) { return this.from(item) }
 
 	// Returns: A new ArrayWrapper builder instance
 	static newBuilder() { return new BuilderWrapper(new ArrayBuilder(), array => new ArrayWrapper(array)) }

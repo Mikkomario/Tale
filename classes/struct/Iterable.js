@@ -163,6 +163,16 @@ export class Iterable {
 	// Checks whether the value equals another
 	contains(a) { return this.exists(v => v == a); }
 
+	// Counts the number of items in this collection, for which `f` yields true.
+	count(f = a => true) {
+		let count = 0;
+		this.foreach(a => {
+			if (f(a))
+				count += 1;
+		})
+		return count;
+	}
+
 	// Creates a string from the contents of this collection.
 	// Accepts:
 	//		- separator: String - A separator placed between each item. Default = empty.

@@ -93,9 +93,9 @@ export class Dict extends IterableWithOption {
 	// Constructor
 	// Expects a vector of pairs
 	// Also interprets following:
-	// - Iterable or array of pairs
-	// - a single Pair
-	// - Object => Will be converted to key-value pairs
+	// 		- Iterable or array of pairs
+	// 		- a single Pair
+	// 		- Object => Will be converted to key-value pairs
 	// Other types are converted to some sort of key value pairs
 	constructor(values = Vector.empty) {
 		super();
