@@ -22,8 +22,10 @@ class DateLike {
 	valueOf() { return this.toDate.valueOf() }
 	equals(other) { return this.valueOf() === other.valueOf() }
 	toString(context = englishDateContext) { 
-		if (this.hasTime)
-			return `${this.dateStringIn(context)} ${this.timeString} (${this.timeZone})`
+		if (this.hasTime) {
+			const timezoneStr = this.timeZone === localTimeZone() ? '' : `(${this.timeZone})`;
+			return `${this.dateStringIn(context)} ${this.timeString}${timezoneStr}`
+		}
 		else
 			return this.dateStringIn(context);
 	}
