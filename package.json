@@ -1,6 +1,6 @@
 {
   "name": "@mikkomario/tale",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Contains data structures and other utility functions, somewhat similar to Utopia modules in Scala.",
   "main": "./dist/index.js",
@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "vite build",
+    "prepare": "npm run build",
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest",
