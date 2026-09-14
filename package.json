@@ -16,7 +16,6 @@
   },
   "scripts": {
     "build": "vite build",
-    "prepare": "npm run build",
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest",
